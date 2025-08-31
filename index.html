@@ -18,37 +18,42 @@
         </header>
 
         <main>
-            <!-- NOVO PAINEL ADMIN "ACORDEÃO" À PROVA DE BUGS -->
-            <details class="card admin-container">
-                <summary class="admin-summary">Painel de Controle (Clique para abrir/fechar)</summary>
-                <div class="admin-panel-content">
-                    <div class="admin-tabs">
-                        <button class="tab-button active" data-tab="tab-roster">Gerenciar Elenco</button>
-                        <button class="tab-button" data-tab="tab-stats">Lançar Estatísticas</button>
-                    </div>
+            <!-- BOTÃO FLUTUANTE DO ADMIN -->
+            <button id="admin-toggle-button" class="btn admin-toggle">Admin</button>
 
-                    <!-- Aba de Gerenciar Elenco -->
-                    <div id="tab-roster" class="tab-content active">
-                        <h2>Adicionar Jogador</h2>
-                        <form id="add-player-form" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-                            <input type="text" id="new-player-name" placeholder="Nome do novo jogador" required style="flex-grow: 1;">
-                            <button type="submit" class="btn">Adicionar</button>
-                        </form>
-                        <h2 style="margin-top:2rem; margin-bottom:1rem;">Elenco Atual</h2>
-                        <table style="width: 100%;">
-                            <tbody id="admin-roster-list" class="admin-roster-list"></tbody>
-                        </table>
-                        <button id="reset-all-data" class="btn btn-danger" style="margin-top: 2rem;">Resetar TUDO (Jogadores e Stats)</button>
-                    </div>
-
-                    <!-- Aba de Lançar Estatísticas -->
-                    <div id="tab-stats" class="tab-content">
-                        <h2>Lançar Stats da Partida/Sessão</h2>
-                        <div id="stat-entry-list" class="stat-entry-list"></div>
-                        <button id="save-stats-button" class="btn" style="margin-top: 1rem; background-color: var(--success);">Salvar Stats da Sessão</button>
-                    </div>
+            <!-- PAINEL DO ADMIN (ESCONDIDO) -->
+            <section id="admin-panel" class="card">
+                <div class="admin-tabs">
+                    <button class="tab-button active" data-tab="tab-roster">Gerenciar Elenco</button>
+                    <button class="tab-button" data-tab="tab-stats">Lançar Estatísticas</button>
                 </div>
-            </details>
+
+                <!-- Aba de Gerenciar Elenco -->
+                <div id="tab-roster" class="tab-content active">
+                    <h2>Adicionar Jogador ao Elenco</h2>
+                    <form id="add-player-form" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                        <input type="text" id="new-player-name" placeholder="Nome do novo jogador" required style="flex-grow: 1;">
+                        <button type="submit" class="btn">Adicionar</button>
+                    </form>
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">Nome</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-roster-list" class="admin-roster-list"></tbody>
+                    </table>
+                    <button id="reset-all-data" class="btn btn-danger" style="margin-top: 2rem;">Resetar TUDO (Jogadores e Stats)</button>
+                </div>
+
+                <!-- Aba de Lançar Estatísticas -->
+                <div id="tab-stats" class="tab-content">
+                    <h2>Lançar Stats da Partida/Sessão</h2>
+                    <div id="stat-entry-list" class="stat-entry-list"></div>
+                    <button id="save-stats-button" class="btn" style="margin-top: 1rem; background-color: var(--success);">Salvar Stats da Sessão</button>
+                </div>
+            </section>
             
             <!-- CLASSIFICAÇÃO PÚBLICA -->
             <section class="card">
@@ -56,12 +61,11 @@
                 <div id="leaderboard-list" class="leaderboard-list"></div>
             </section>
 
-            <!-- SEÇÃO DE REGRAS -->
+            <!-- SEÇÃO DE REGRAS (ATUALIZADA) -->
             <section class="card">
-                <h2>Critérios de Pontuação e Prêmios</h2>
+                <h2>Critérios de Pontuação</h2>
                 <ul class="rules-list">
-                    <li><strong style="color:var(--primary)">Média de 15 pontos</strong> para se qualificar para o time principal.</li>
-                    <li><strong style="color:var(--warning)">Prêmio:</strong> Atingir 100 Pontos = 100 Robux! 🏆</li>
+                    <li><strong style="color:var(--primary)">Média de 6.0 pontos</strong> para se qualificar para o time principal.</li>
                     <li><strong>1.0 Ponto</strong> por Drible.</li>
                     <li><strong>0.8 Ponto</strong> por Salvo (defesa).</li>
                     <li><strong>0.3 Ponto</strong> por Gol.</li>
@@ -79,7 +83,6 @@
         </div>
     </div>
     
-    <div id="toast-notification" class="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
