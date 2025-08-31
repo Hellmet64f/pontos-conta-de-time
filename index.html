@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Comets (TCS) - Dashboard</title>
     
-    <!-- Ícone da Aba -->
     <link rel="icon" href="https://i.imgur.com/g8e1a5j.png" type="image/png">
-    
-    <!-- Link para o Arquivo de Estilo -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -55,6 +52,18 @@
                 <h2>Classificação Geral</h2>
                 <div id="leaderboard-list" class="leaderboard-list"></div>
             </section>
+            
+            <!-- SEÇÃO DE REGRAS (ATUALIZADA) -->
+            <section class="card">
+                <h2>Critérios de Pontuação</h2>
+                <ul class="rules-list">
+                    <li><strong style="color:var(--primary)">Média de 6.0 pontos</strong> para se qualificar para o time principal.</li>
+                    <li><strong>0.5 Ponto</strong> a cada 3 Gols (Ex: 6 Gols = 1.0 Ponto).</li>
+                    <li><strong>2 Pontos</strong> por Salvo (defesa).</li>
+                    <li><strong>1 Ponto</strong> a cada 7 Assistências.</li>
+                    <li><strong>1 Ponto</strong> a cada 5 Dribles.</li>
+                </ul>
+            </section>
         </main>
     </div>
 
@@ -62,13 +71,10 @@
     <div id="player-modal" class="modal-overlay">
         <div class="modal">
             <button id="modal-close-button" class="modal-close">&times;</button>
-            <div id="modal-content">
-                <!-- Conteúdo dinâmico aqui -->
-            </div>
+            <div id="modal-content"></div>
         </div>
     </div>
     
-    <!-- Link para o Arquivo de Lógica -->
     <script src="script.js"></script>
 </body>
 </html>
