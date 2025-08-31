@@ -30,13 +30,13 @@
 
                 <!-- Aba de Gerenciar Elenco -->
                 <div id="tab-roster" class="tab-content active">
-                    <h2>Adicionar Jogador ao Elenco</h2>
+                    <h2>Adicionar Jogador</h2>
                     <form id="add-player-form" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
                         <input type="text" id="new-player-name" placeholder="Nome do novo jogador" required style="flex-grow: 1;">
                         <button type="submit" class="btn">Adicionar</button>
                     </form>
+                    <h2 style="margin-top:2rem; margin-bottom:1rem;">Elenco Atual</h2>
                     <table style="width: 100%;">
-                        <thead><tr><th style="text-align: left;">Nome</th><th style="text-align: right;">Ações</th></tr></thead>
                         <tbody id="admin-roster-list" class="admin-roster-list"></tbody>
                     </table>
                     <button id="reset-all-data" class="btn btn-danger" style="margin-top: 2rem;">Resetar TUDO (Jogadores e Stats)</button>
@@ -56,7 +56,7 @@
                 <div id="leaderboard-list" class="leaderboard-list"></div>
             </section>
 
-            <!-- SEÇÃO DE REGRAS (ATUALIZADA) -->
+            <!-- SEÇÃO DE REGRAS -->
             <section class="card">
                 <h2>Critérios de Pontuação e Prêmios</h2>
                 <ul class="rules-list">
@@ -79,6 +79,7 @@
         </div>
     </div>
     
+    <div id="toast-notification" class="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
