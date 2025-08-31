@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Comets (TCS) - Classificação</title>
+    <style>
+        /* CSS BÁSICO E FUNCIONAL - MESMO ESTILO DO ADMIN */
+        body { font-family: sans-serif; background-color: #2c3e50; color: #ecf0f1; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background-color: #34495e; padding: 20px; border-radius: 8px; }
+        header { text-align: center; border-bottom: 1px solid #7f8c8d; padding-bottom: 15px; margin-bottom: 20px; }
+        .logo { max-width: 80px; }
+        h1, h2 { color: #e74c3c; margin-top: 0; }
+        a.nav-link { display: block; text-align: center; background-color: #2980b9; color: white; padding: 10px; border-radius: 5px; text-decoration: none; margin-bottom: 20px; }
+        .public-section { background-color: #2c3e50; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #7f8c8d; }
+        .status-qualified { color: #2ecc71; font-weight: bold; }
+        .status-not-qualified { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://i.imgur.com/g8e1a5j.png" alt="Logo" class="logo">
+            <h1>Classificação - The Comets</h1>
+        </header>
+
+        <a href="admin.html" class="nav-link">Ir para o Painel de Controle</a>
+        
+        <div class="public-section">
+            <h2>Critérios de Pontuação</h2>
+            <p><strong>Média 6 para qualificar.</strong></p>
+            <ul>
+                <li>1 Gol = 3 Pontos</li>
+                <li>7 Assistências = 1 Ponto</li>
+                <li>1 Salvo = 2 Pontos</li>
+                <li>5 Dribles = 1 Ponto</li>
+            </ul>
+        </div>
+
+        <div class="public-section">
+            <h2>Classificação Geral</h2>
+            <table>
+                <thead>
+                    <tr><th>Pos.</th><th>Nome</th><th>Pontos</th><th>Status</th></tr>
+                </thead>
+                <tbody id="ranking-list">
+                    <!-- A classificação aparecerá aqui -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // SCRIPT SIMPLES E DIRETO, SEM BUGS
+        const rankingList = document.getElementById('ranking-list');
+        const STORAGE_KEY = 'tcs_players_simple'; // MESMA CHAVE DO ADMIN
+
+        // 1. FUNÇÕES DE DADOS (CÓPIA DO ADMIN)
+        const getPlayers = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        
+        // 2. FUNÇÃO PARA CALCULAR OS PONTOS
+        const calculatePoints = (player) => {
+            let points = 0;
+            points += (player.goals || 0) * 3;
+            points += (player.saves || 0) * 2;
+            points += Math.floor((player.assists || 0) / 7);
+            points += Math.floor((player.dribbles || 0) / 5);
+            return points;
+        };
+        
+        // 3. FUNÇÃO PARA ATUALIZAR A TABELA DE RANKING
+        const renderRankingTable = () => {
+            rankingList.innerHTML = ''; // Limpa a tabela
+            const players = getPlayers();
+
+            if (players.length === 0) {
+                rankingList.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum jogador para classificar. Adicione no Admin.</td></tr>';
+                return;
+            }
+
+            // Adiciona a pontuação a cada jogador
+            players.forEach(player => {
+                player.points = calculatePoints(player);
+            });
+            
+            // Ordena os jogadores por pontos (do maior para o menor)
+            players.sort((a, b) => b.points - a.points);
+            
+            // Cria a tabela
+            players.forEach((player, index) => {
+                const status = player.points >= 6 ? 'Qualificado' : 'Não Qualificado';
+                const statusClass = status === 'Qualificado' ? 'status-qualified' : 'status-not-qualified';
+                
+                const row = rankingList.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}º</td>
+                    <td>${player.name}</td>
+                    <td>${player.points.toFixed(1)}</td>
+                    <td class="${statusClass}">${status}</td>
+                `;
+            });
+        };
+        
+        // 4. CARREGA O RANKING QUANDO A PÁGINA ABRE
+        renderRankingTable();
+    </script>
+</body>
+</html>
