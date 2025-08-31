@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Comets (TCS) - Dashboard</title>
+    
+    <link rel="icon" href="https://i.imgur.com/g8e1a5j.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- =================================================================== -->
+    <!-- ESTILO (CSS) - O VISUAL COMPLETO DO SITE -->
+    <!-- =================================================================== -->
+    <style>
+        :root {
+            --bg-dark: #0f172a; --bg-medium: #1e293b; --bg-light: #334155;
+            --primary: #22d3ee; --primary-hover: #67e8f9; --secondary: #f43f5e;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --text-lightest: #f8fafc; --text-light: #e2e8f0; --text-muted: #94a3b8;
+            --border-color: #475569;
+        }
+
+        /* RESET GERAL */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Poppins', sans-serif; background-color: var(--bg-dark); color: var(--text-light);
+            padding: 2rem 1rem; line-height: 1.6;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+        .hidden { display: none !important; }
+
+        /* HEADER */
+        header { text-align: center; margin-bottom: 3rem; animation: slideInDown 0.6s ease-out; }
+        .logo { width: 100px; height: 100px; margin-bottom: 1rem; }
+        h1.team-name { color: var(--text-lightest); font-size: 2.5rem; font-weight: 800; }
+
+        /* CARD - COMPONENTE BASE */
+        .card {
+            background: linear-gradient(145deg, var(--bg-medium), var(--bg-dark));
+            border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem;
+            margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); animation: slideInUp 0.6s ease-out;
+        }
+        .card h2 { font-size: 1.75rem; color: var(--text-lightest); margin-bottom: 1.5rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; }
+        
+        /* BOTÕES */
+        .btn {
+            display: inline-block; padding: 0.75rem 1.5rem; background-color: var(--primary); color: var(--bg-dark);
+            border: none; border-radius: 50px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; text-decoration: none; transition: all 0.2s ease-in-out;
+        }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-3px) scale(1.05); box-shadow: 0 4px 20px rgba(34, 211, 238, 0.3); }
+        .btn.btn-danger { background-color: var(--danger); color: white; }
+        
+        /* TABELAS E LISTAS */
+        .leaderboard-list, .admin-roster-list { list-style: none; padding: 0; }
+        .leaderboard-item, .admin-roster-item {
+            display: flex; align-items: center; padding: 1rem;
+            border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;
+        }
+        .leaderboard-item:last-child, .admin-roster-item:last-child { border-bottom: none; }
+        .leaderboard-item:hover { background-color: var(--bg-light); cursor: pointer; border-radius: 8px;}
+
+        /* ESTILOS DA CLASSIFICAÇÃO */
+        .pos { font-size: 1.5rem; font-weight: 800; color: var(--primary); width: 60px; text-align: center;}
+        .player-name { flex-grow: 1; font-size: 1.1rem; font-weight: 600; color: var(--text-lightest); }
+        .player-points { font-size: 1.2rem; font-weight: 700; }
+        .leaderboard-item.rank-1 .pos { color: var(--warning); }
+        .leaderboard-item.rank-1 .player-name { color: var(--warning); }
+        .icon-crown { color: var(--warning); margin-right: 10px; }
+
+        /* ADMIN */
+        .admin-toggle { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000; }
+        #admin-panel { max-height: 0; overflow: hidden; opacity: 0; transition: all 0.6s ease-in-out; }
+        #admin-panel.visible { max-height: 2000px; opacity: 1; margin-top: 2rem;}
+
+        .admin-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .tab-button { background: none; border: none; color: var(--text-muted); padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .tab-button.active { color: var(--primary); border-bottom-color: var(--primary); }
+        
+        input[type="text"] { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem; }
+        .admin-roster-item .btn { padding: 0.5rem; margin-left: 0.5rem; font-size: 0.8rem; border-radius: 8px; }
+
+        .stat-entry-list .player-name { width: 120px; flex-grow: 0; }
+        .stat-entry-item { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+        .stat-input-group { display: flex; align-items: center; gap: 0.5rem; }
+        .stat-input-group label { font-weight: 600; color: var(--text-muted); }
+        .stat-input-group .btn { width: 32px; height: 32px; padding: 0; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; background-color: var(--bg-light); color: var(--primary); }
+        .stat-input-group input { width: 50px; text-align: center; }
+
+        /* MODAL (PERFIL DO JOGADOR) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.visible { opacity: 1; pointer-events: all; }
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
+            background: linear-gradient(145deg, #2a3a50, var(--bg-dark));
+            border-radius: 16px; padding: 2.5rem; width: 90%; max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal { transform: translate(-50%, -50%) scale(1); }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal-header h3 { font-size: 2rem; color: var(--primary); }
+        .modal-header p { font-size: 1.2rem; color: var(--text-lightest); margin-bottom: 1.5rem; }
+        .stat-graph { display: flex; justify-content: space-around; align-items: flex-end; height: 150px; border-left: 2px solid var(--border-color); border-bottom: 2px solid var(--border-color); padding-top: 1rem;}
+        .stat-bar { width: 40px; background-color: var(--secondary); text-align: center; color: white; font-weight: 700; transition: height 0.5s ease-out; }
+        .bar-label { margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); }
+        
+        /* ANIMAÇÕES */
+        @keyframes slideInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- CABEÇALHO -->
+        <header>
+            <img src="https://i.imgur.com/g8e1a5j.png" alt="Logo The Comets" class="logo">
+            <h1 class="team-name">The Comets (TCS)</h1>
+        </header>
+
+        <main>
+            <!-- BOTÃO FLUTUANTE DO ADMIN -->
+            <button id="admin-toggle-button" class="btn admin-toggle">Admin</button>
+
+            <!-- PAINEL DO ADMIN (ESCONDIDO) -->
+            <section id="admin-panel" class="card">
+                <div class="admin-tabs">
+                    <button class="tab-button active" data-tab="tab-roster">Gerenciar Elenco</button>
+                    <button class="tab-button" data-tab="tab-stats">Lançar Estatísticas</button>
+                </div>
+
+                <!-- Aba de Gerenciar Elenco -->
+                <div id="tab-roster" class="tab-content active">
+                    <h2>Adicionar Jogador ao Elenco</h2>
+                    <form id="add-player-form" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                        <input type="text" id="new-player-name" placeholder="Nome do novo jogador" required style="flex-grow: 1;">
+                        <button type="submit" class="btn">Adicionar</button>
+                    </form>
+                    <ul id="admin-roster-list" class="admin-roster-list"></ul>
+                    <button id="reset-all-data" class="btn btn-danger" style="margin-top: 2rem;">Resetar TUDO (Jogadores e Stats)</button>
+                </div>
+
+                <!-- Aba de Lançar Estatísticas -->
+                <div id="tab-stats" class="tab-content">
+                    <h2>Lançar Stats da Partida/Sessão</h2>
+                    <div id="stat-entry-list" class="stat-entry-list"></div>
+                    <button id="save-stats-button" class="btn" style="margin-top: 1rem; background-color: var(--success);">Salvar Stats da Sessão</button>
+                </div>
+            </section>
+            
+            <!-- CLASSIFICAÇÃO PÚBLICA -->
+            <section class="card">
+                <h2>Classificação Geral</h2>
+                <div id="leaderboard-list" class="leaderboard-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL (PERFIL DO JOGADOR) -->
+    <div id="player-modal" class="modal-overlay">
+        <div class="modal">
+            <button id="modal-close-button" class="modal-close">&times;</button>
+            <div id="modal-content">
+                <!-- Conteúdo dinâmico aqui -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- =================================================================== -->
+    <!-- JAVASCRIPT - A LÓGICA COMPLETA DO SITE -->
+    <!-- =================================================================== -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const STORAGE_KEYS = { roster: 'tcs_roster_v3', stats: 'tcs_stats_v3' };
+
+        // === 1. FUNÇÕES DE DADOS E CÁLCULO ===
+        const getRoster = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.roster)) || [];
+        const saveRoster = (roster) => localStorage.setItem(STORAGE_KEYS.roster, JSON.stringify(roster));
+        const getStats = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.stats)) || {};
+        const saveStats = (stats) => localStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(stats));
+
+        const calculatePoints = (playerId, stats) => {
+            const playerStats = stats[playerId] || { goals: 0, assists: 0, saves: 0, dribbles: 0 };
+            return (playerStats.goals * 3) + (playerStats.saves * 2) + Math.floor(playerStats.assists / 7) + Math.floor(playerStats.dribbles / 5);
+        };
+
+        // === 2. FUNÇÕES DE RENDERIZAÇÃO (ATUALIZAR TELA) ===
+        const renderAll = () => {
+            renderLeaderboard();
+            renderAdminRoster();
+            renderStatEntryForm();
+        };
+
+        const renderLeaderboard = () => {
+            const leaderboardList = document.getElementById('leaderboard-list');
+            const roster = getRoster();
+            const stats = getStats();
+            leaderboardList.innerHTML = '';
+
+            if (roster.length === 0) {
+                leaderboardList.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum jogador no elenco. Adicione no painel Admin.</p>';
+                return;
+            }
+
+            const rankedPlayers = roster.map(player => ({
+                ...player,
+                points: calculatePoints(player.id, stats)
+            })).sort((a, b) => b.points - a.points);
+
+            rankedPlayers.forEach((player, index) => {
+                const isRank1 = index === 0;
+                const item = document.createElement('div');
+                item.className = `leaderboard-item ${isRank1 ? 'rank-1' : ''}`;
+                item.dataset.playerId = player.id;
+                item.innerHTML = `
+                    <div class="pos">${isRank1 ? '👑' : `${index + 1}º`}</div>
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-points">${player.points.toFixed(1)} pts</div>
+                `;
+                leaderboardList.appendChild(item);
+            });
+        };
+
+        const renderAdminRoster = () => {
+            const rosterList = document.getElementById('admin-roster-list');
+            const roster = getRoster();
+            rosterList.innerHTML = '';
+            roster.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'admin-roster-item';
+                item.innerHTML = `
+                    <span class="player-name">${player.name}</span>
+                    <button class="btn btn-edit" data-id="${player.id}">Editar</button>
+                    <button class="btn btn-danger" data-id="${player.id}">Excluir</button>
+                `;
+                rosterList.appendChild(item);
+            });
+        };
+
+        const renderStatEntryForm = () => {
+            const statEntryList = document.getElementById('stat-entry-list');
+            const roster = getRoster();
+            statEntryList.innerHTML = '';
+
+            roster.forEach(player => {
+                const item = document.createElement('div');
+                item.className = 'stat-entry-item';
+                item.dataset.playerId = player.id;
+                item.innerHTML = `
+                    <span class="player-name">${player.name}</span>
+                    <div class="stat-input-group"><label>G</label><button class="btn add-stat">+</button><input type="number" class="stat-value" min="0" value="0"></div>
+                    <div class="stat-input-group"><label>A</label><button class="btn add-stat">+</button><input type="number" class="stat-value" min="0" value="0"></div>
+                    <div class="stat-input-group"><label>S</label><button class="btn add-stat">+</button><input type="number" class="stat-value" min="0" value="0"></div>
+                    <div class="stat-input-group"><label>D</label><button class="btn add-stat">+</button><input type="number" class="stat-value" min="0" value="0"></div>
+                `;
+                statEntryList.appendChild(item);
+            });
+        };
+
+        const openPlayerModal = (playerId) => {
+            const roster = getRoster();
+            const stats = getStats();
+            const player = roster.find(p => p.id === playerId);
+            if (!player) return;
+
+            const playerStats = stats[playerId] || { goals: 0, assists: 0, saves: 0, dribbles: 0 };
+            const points = calculatePoints(playerId, stats);
+            const modalContent = document.getElementById('modal-content');
+            
+            const statsArray = [playerStats.goals, playerStats.assists, playerStats.saves, playerStats.dribbles];
+            const maxStat = Math.max(...statsArray, 1); // Evita divisão por zero
+
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h3>${player.name}</h3>
+                    <p>${points.toFixed(1)} Pontos</p>
+                </div>
+                <div class="stat-graph">
+                    <div class="bar-container">
+                        <div class="stat-bar" style="height:${(playerStats.goals/maxStat)*100}%; background-color:#f43f5e;" title="${playerStats.goals} Gols">${playerStats.goals}</div>
+                        <div class="bar-label">Gols</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="stat-bar" style="height:${(playerStats.assists/maxStat)*100}%; background-color:#3b82f6;" title="${playerStats.assists} Assistências">${playerStats.assists}</div>
+                        <div class="bar-label">Assist.</div>
+                    </div>
+                     <div class="bar-container">
+                        <div class="stat-bar" style="height:${(playerStats.saves/maxStat)*100}%; background-color:#10b981;" title="${playerStats.saves} Salvos">${playerStats.saves}</div>
+                        <div class="bar-label">Salvos</div>
+                    </div>
+                     <div class="bar-container">
+                        <div class="stat-bar" style="height:${(playerStats.dribbles/maxStat)*100}%; background-color:#f59e0b;" title="${playerStats.dribbles} Dribles">${playerStats.dribbles}</div>
+                        <div class="bar-label">Dribles</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('player-modal').classList.add('visible');
+        };
+
+        // === 3. MANIPULADORES DE EVENTOS ===
+        // Painel Admin
+        document.getElementById('admin-toggle-button').addEventListener('click', () => {
+            document.getElementById('admin-panel').classList.toggle('visible');
+        });
+        
+        // Abas do Admin
+        document.querySelector('.admin-tabs').addEventListener('click', e => {
+            if (e.target.matches('.tab-button')) {
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('hidden', 'active'));
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.tab).classList.add('active');
+            }
+        });
+
+        // Adicionar jogador ao elenco
+        document.getElementById('add-player-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const input = document.getElementById('new-player-name');
+            const newName = input.value.trim();
+            if (newName) {
+                const roster = getRoster();
+                roster.push({ id: Date.now().toString(), name: newName });
+                saveRoster(roster);
+                renderAll();
+                input.value = '';
+            }
+        });
+        
+        // Botões do elenco (Editar, Excluir)
+        document.getElementById('admin-roster-list').addEventListener('click', e => {
+            const roster = getRoster();
+            const stats = getStats();
+            const id = e.target.dataset.id;
+            
+            if (e.target.matches('.btn-danger')) {
+                if (confirm('Tem certeza? Isso removerá o jogador e todas as suas estatísticas permanentemente.')) {
+                    saveRoster(roster.filter(p => p.id !== id));
+                    delete stats[id];
+                    saveStats(stats);
+                    renderAll();
+                }
+            }
+            if (e.target.matches('.btn-edit')) {
+                const player = roster.find(p => p.id === id);
+                const newName = prompt('Digite o novo nome para:', player.name);
+                if (newName && newName.trim()) {
+                    player.name = newName.trim();
+                    saveRoster(roster);
+                    renderAll();
+                }
+            }
+        });
+
+        // Lançamento rápido de stats
+        document.getElementById('stat-entry-list').addEventListener('click', e => {
+            if (e.target.matches('.add-stat')) {
+                const input = e.target.nextElementSibling;
+                input.value = parseInt(input.value) + 1;
+            }
+        });
+
+        // Salvar Stats da Sessão
+        document.getElementById('save-stats-button').addEventListener('click', () => {
+            const currentStats = getStats();
+            document.querySelectorAll('.stat-entry-item').forEach(item => {
+                const playerId = item.dataset.playerId;
+                const inputs = item.querySelectorAll('.stat-value');
+                const sessionStats = {
+                    goals: parseInt(inputs[0].value) || 0,
+                    assists: parseInt(inputs[1].value) || 0,
+                    saves: parseInt(inputs[2].value) || 0,
+                    dribbles: parseInt(inputs[3].value) || 0,
+                };
+                
+                if (!currentStats[playerId]) currentStats[playerId] = { goals: 0, assists: 0, saves: 0, dribbles: 0 };
+                
+                currentStats[playerId].goals += sessionStats.goals;
+                currentStats[playerId].assists += sessionStats.assists;
+                currentStats[playerId].saves += sessionStats.saves;
+                currentStats[playerId].dribbles += sessionStats.dribbles;
+            });
+            saveStats(currentStats);
+            renderAll();
+            alert('Estatísticas da sessão salvas com sucesso!');
+        });
+        
+        // Abrir Modal
+        document.getElementById('leaderboard-list').addEventListener('click', e => {
+            const playerItem = e.target.closest('.leaderboard-item');
+            if (playerItem) {
+                openPlayerModal(playerItem.dataset.playerId);
+            }
+        });
+        
+        // Fechar Modal
+        document.getElementById('player-modal').addEventListener('click', e => {
+            if (e.target === e.currentTarget || e.target.matches('#modal-close-button')) {
+                e.currentTarget.classList.remove('visible');
+            }
+        });
+
+        // Resetar TUDO
+        document.getElementById('reset-all-data').addEventListener('click', () => {
+            if (confirm('PERIGO! ISSO APAGARÁ TODO O ELENCO E TODAS AS ESTATÍSTICAS PARA SEMPRE. TEM CERTEZA?')) {
+                localStorage.removeItem(STORAGE_KEYS.roster);
+                localStorage.removeItem(STORAGE_KEYS.stats);
+                renderAll();
+            }
+        });
+        
+        // === 4. CARGA INICIAL ===
+        renderAll();
+    });
+    </script>
+</body>
+</html>
