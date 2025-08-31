@@ -1,113 +1,197 @@
-// Aguarda o DOM estar completamente carregado antes de executar o script
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Identifica qual página está ativa (admin.html ou index.html)
-    const isAdminPage = document.getElementById('add-player-form');
-    const isMainPage = document.getElementById('player-ranking');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-    // Função para buscar jogadores do localStorage
-    const getPlayers = () => {
-        const players = localStorage.getItem('tcsPlayers');
-        return players ? JSON.parse(players) : [];
-    };
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alterado para alinhar no topo */
+    min-height: 100vh;
+}
 
-    // Função para salvar jogadores no localStorage
-    const savePlayers = (players) => {
-        localStorage.setItem('tcsPlayers', JSON.stringify(players));
-    };
+.container {
+    width: 100%;
+    max-width: 900px;
+    background-color: #162447;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    padding: 30px;
+    margin: 20px 0; /* Adicionado margem */
+}
 
-    // Função para calcular os pontos de um jogador
-    const calculatePoints = (player) => {
-        // Pontuação: 1 gol = 3 pontos, 1 salvo = 2 pontos
-        let points = (player.goals * 3) + (player.saves * 2);
-        
-        // A cada 7 assistências = 1 ponto
-        points += Math.floor(player.assists / 7);
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #1f4068;
+    padding-bottom: 20px;
+}
 
-        // A cada 5 dribles = 1 ponto
-        points += Math.floor(player.dribbles / 5);
+.logo {
+    max-width: 100px;
+    margin-bottom: 15px;
+}
 
-        return points;
-    };
+header h1 {
+    color: #e43f5a;
+    margin: 0;
+}
 
-    // LÓGICA DA PÁGINA DE ADMIN
-    if (isAdminPage) {
-        const form = document.getElementById('add-player-form');
-        const adminPlayerList = document.getElementById('admin-player-list').getElementsByTagName('tbody')[0];
+.form-container, .player-list-container, .match-history-container {
+    background-color: #1b263b;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
 
-        // Função para renderizar a lista de jogadores na página de admin
-        const renderAdminList = () => {
-            adminPlayerList.innerHTML = '';
-            const players = getPlayers();
-            players.forEach((player, index) => {
-                const row = adminPlayerList.insertRow();
-                row.innerHTML = `
-                    <td>${player.name}</td>
-                    <td>${player.goals}</td>
-                    <td>${player.assists}</td>
-                    <td>${player.saves}</td>
-                    <td>${player.dribbles}</td>
-                    <td><button class="btn-remove" data-index="${index}">Remover</button></td>
-                `;
-            });
-        };
+h2 {
+    color: #e43f5a;
+    border-bottom: 2px solid #e43f5a;
+    padding-bottom: 5px;
+    margin-top: 0;
+}
 
-        // Evento para adicionar um novo jogador
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newPlayer = {
-                name: document.getElementById('player-name').value,
-                goals: parseInt(document.getElementById('goals').value),
-                assists: parseInt(document.getElementById('assists').value),
-                saves: parseInt(document.getElementById('saves').value),
-                dribbles: parseInt(document.getElementById('dribbles').value),
-            };
-            
-            const players = getPlayers();
-            players.push(newPlayer);
-            savePlayers(players);
-            renderAdminList();
-            form.reset();
-        });
+h3 {
+    color: #e0e0e0;
+    margin-top: 20px;
+}
 
-        // Evento para remover um jogador
-        adminPlayerList.addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn-remove')) {
-                const index = e.target.getAttribute('data-index');
-                let players = getPlayers();
-                players.splice(index, 1);
-                savePlayers(players);
-                renderAdminList();
-            }
-        });
+.form-group {
+    margin-bottom: 15px;
+}
 
-        // Renderiza a lista inicial ao carregar a página
-        renderAdminList();
-    }
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
 
-    // LÓGICA DA PÁGINA PRINCIPAL (INDEX.HTML)
-    if (isMainPage) {
-        const playerRankingBody = document.getElementById('player-ranking').getElementsByTagName('tbody')[0];
-        
-        const renderRanking = () => {
-            playerRankingBody.innerHTML = '';
-            const players = getPlayers();
-            
-            players.forEach(player => {
-                const totalPoints = calculatePoints(player);
-                const status = totalPoints >= 6 ? 'Qualificado' : 'Não Qualificado';
-                const statusClass = totalPoints >= 6 ? 'status-qualified' : 'status-not-qualified';
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #415a77;
+    background-color: #0d1b2a;
+    color: #e0e0e0;
+    box-sizing: border-box;
+}
 
-                const row = playerRankingBody.insertRow();
-                row.innerHTML = `
-                    <td>${player.name}</td>
-                    <td>${totalPoints}</td>
-                    <td class="${statusClass}">${status}</td>
-                `;
-            });
-        };
-        
-        // Renderiza o ranking ao carregar a página
-        renderRanking();
-    }
-});
+#player-stats-for-match .player-stat-input {
+    border-left: 3px solid #e43f5a;
+    padding-left: 15px;
+    margin-bottom: 15px;
+}
+
+#player-stats-for-match label {
+    font-size: 0.9em;
+}
+
+.btn, .btn-view {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    background-color: #e43f5a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #b33045;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #415a77;
+}
+
+thead {
+    background-color: #1f4068;
+}
+
+.btn-remove {
+    background-color: #772e2e;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background-color: #5a2222;
+}
+
+.status-qualified {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.status-not-qualified {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.rules {
+    background-color: #1b263b;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.rules ul {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.match-card {
+    background-color: #1f2a40;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.match-card h3 {
+    margin: 0 0 5px 0;
+    color: #e43f5a;
+}
+
+.match-card p {
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.player-performance {
+    font-size: 0.9em;
+    padding-left: 15px;
+    border-left: 2px solid #415a77;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-view {
+    width: auto;
+    padding: 10px 20px;
+    background-color: #1f4068;
+}
+
+.btn-view:hover {
+    background-color: #2a5a8a;
+}
