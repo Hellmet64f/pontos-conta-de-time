@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const STORAGE_KEYS = { roster: 'tcs_roster_v3', stats: 'tcs_stats_v3' };
+    const QUALIFICATION_AVERAGE = 6.0;
 
-    // === 1. FUNÇÕES DE DADOS E CÁLCULO ===
+    // === 1. FUNÇÕES DE DADOS E CÁLCULO (LÓGICA ATUALIZADA AQUI) ===
     const getRoster = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.roster)) || [];
     const saveRoster = (roster) => localStorage.setItem(STORAGE_KEYS.roster, JSON.stringify(roster));
     const getStats = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.stats)) || {};
@@ -10,7 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calculatePoints = (playerId, stats) => {
         const playerStats = stats[playerId] || { goals: 0, assists: 0, saves: 0, dribbles: 0 };
-        return (playerStats.goals * 3) + (playerStats.saves * 2) + Math.floor(playerStats.assists / 7) + Math.floor(playerStats.dribbles / 5);
+        
+        // --- NOVA LÓGICA DE PONTOS APLICADA AQUI ---
+        const goalPoints = (Math.floor(playerStats.goals / 3)) * 0.5;
+        const assistPoints = Math.floor(playerStats.assists / 7);
+        const savePoints = playerStats.saves * 2;
+        const dribblePoints = Math.floor(playerStats.dribbles / 5);
+        
+        return goalPoints + assistPoints + savePoints + dribblePoints;
     };
 
     // === 2. FUNÇÕES DE RENDERIZAÇÃO (ATUALIZAR TELA) ===
