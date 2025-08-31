@@ -21,18 +21,11 @@
 
         <main>
             <div class="rules">
-                <h3>Critérios de Pontuação:</h3>
+                <h3>Critérios de Pontuação</h3>
                 <p>Média de 4.5 pontos para entrar no time principal.</p>
-                <ul>
-                    <li><strong>1 Gol</strong> = 3 Pontos</li>
-                    <li><strong>A cada 7 Assistências</strong> = 1 Ponto</li>
-                    <li><strong>A cada 5 Dribles</strong> = 1 Ponto</li>
-                    <li><strong>1 Salvo (Defesa)</strong> = 2 Pontos</li>
-                </ul>
             </div>
             
             <div class="player-list-container">
-                <!-- TÍTULO REMOVIDO DAQUI -->
                 <table id="player-ranking">
                     <thead>
                         <tr>
@@ -41,7 +34,9 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="player-ranking-body">
+                        <!-- O conteúdo será inserido pelo JavaScript -->
+                    </tbody>
                 </table>
             </div>
         </main>
