@@ -8,7 +8,7 @@ body {
     padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Alterado para alinhar no topo */
     min-height: 100vh;
 }
 
@@ -19,6 +19,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     padding: 30px;
+    margin: 20px 0; /* Adicionado margem */
 }
 
 header {
@@ -38,11 +39,11 @@ header h1 {
     margin: 0;
 }
 
-.form-container, .player-list-container {
+.form-container, .player-list-container, .match-history-container {
     background-color: #1b263b;
     padding: 20px;
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 h2 {
@@ -50,6 +51,11 @@ h2 {
     border-bottom: 2px solid #e43f5a;
     padding-bottom: 5px;
     margin-top: 0;
+}
+
+h3 {
+    color: #e0e0e0;
+    margin-top: 20px;
 }
 
 .form-group {
@@ -70,6 +76,16 @@ h2 {
     background-color: #0d1b2a;
     color: #e0e0e0;
     box-sizing: border-box;
+}
+
+#player-stats-for-match .player-stat-input {
+    border-left: 3px solid #e43f5a;
+    padding-left: 15px;
+    margin-bottom: 15px;
+}
+
+#player-stats-for-match label {
+    font-size: 0.9em;
 }
 
 .btn, .btn-view {
@@ -140,6 +156,29 @@ thead {
 .rules ul {
     padding-left: 20px;
     margin: 0;
+}
+
+.match-card {
+    background-color: #1f2a40;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.match-card h3 {
+    margin: 0 0 5px 0;
+    color: #e43f5a;
+}
+
+.match-card p {
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.player-performance {
+    font-size: 0.9em;
+    padding-left: 15px;
+    border-left: 2px solid #415a77;
 }
 
 footer {
