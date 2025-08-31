@@ -1,197 +1,213 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // CONSTANTES
+    const QUALIFICATION_AVERAGE = 4.5;
+    const isAdminPage = document.getElementById('add-player-form');
+    const isMainPage = document.getElementById('player-ranking');
 
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #1a1a2e;
-    color: #e0e0e0;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Alterado para alinhar no topo */
-    min-height: 100vh;
-}
+    // FUNÇÕES DE DADOS (JOGADORES)
+    const getPlayers = () => JSON.parse(localStorage.getItem('tcsPlayers')) || [];
+    const savePlayers = (players) => localStorage.setItem('tcsPlayers', JSON.stringify(players));
 
-.container {
-    width: 100%;
-    max-width: 900px;
-    background-color: #162447;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    padding: 30px;
-    margin: 20px 0; /* Adicionado margem */
-}
+    // FUNÇÕES DE DADOS (JOGOS)
+    const getMatches = () => JSON.parse(localStorage.getItem('tcsMatches')) || [];
+    const saveMatches = (matches) => localStorage.setItem('tcsMatches', JSON.stringify(matches));
 
-header {
-    text-align: center;
-    margin-bottom: 30px;
-    border-bottom: 1px solid #1f4068;
-    padding-bottom: 20px;
-}
+    // FUNÇÃO DE CÁLCULO DE PONTOS
+    const calculatePoints = (player) => {
+        let points = (player.goals * 3) + (player.saves * 2);
+        points += Math.floor(player.assists / 7);
+        points += Math.floor(player.dribbles / 5);
+        return points;
+    };
 
-.logo {
-    max-width: 100px;
-    margin-bottom: 15px;
-}
+    // LÓGICA DA PÁGINA DE ADMIN
+    if (isAdminPage) {
+        const playerForm = document.getElementById('add-player-form');
+        const adminPlayerList = document.getElementById('admin-player-list').getElementsByTagName('tbody')[0];
+        const matchForm = document.getElementById('add-match-form');
+        const playerStatsForMatchDiv = document.getElementById('player-stats-for-match');
+        const adminMatchList = document.getElementById('admin-match-list').getElementsByTagName('tbody')[0];
 
-header h1 {
-    color: #e43f5a;
-    margin: 0;
-}
+        // Renderiza lista de jogadores no admin
+        const renderAdminPlayerList = () => {
+            adminPlayerList.innerHTML = '';
+            getPlayers().forEach((player, index) => {
+                const row = adminPlayerList.insertRow();
+                row.innerHTML = `
+                    <td>${player.name}</td>
+                    <td>${player.goals}</td>
+                    <td>${player.assists}</td>
+                    <td>${player.saves}</td>
+                    <td>${player.dribbles}</td>
+                    <td><button class="btn-remove" data-type="player" data-index="${index}">Remover</button></td>
+                `;
+            });
+        };
+        
+        // Popula o formulário de jogo com os jogadores atuais
+        const populateMatchForm = () => {
+            playerStatsForMatchDiv.innerHTML = '';
+            getPlayers().forEach((player, index) => {
+                playerStatsForMatchDiv.innerHTML += `
+                    <div class="player-stat-input">
+                        <h4>${player.name}</h4>
+                        <input type="hidden" class="player-name-hidden" value="${player.name}">
+                        <label>Gols:</label><input type="number" class="player-goals" value="0" min="0">
+                        <label>Assist.:</label><input type="number" class="player-assists" value="0" min="0">
+                        <label>Salvos:</label><input type="number" class="player-saves" value="0" min="0">
+                        <label>Dribles:</label><input type="number" class="player-dribbles" value="0" min="0">
+                    </div>`;
+            });
+        };
 
-.form-container, .player-list-container, .match-history-container {
-    background-color: #1b263b;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-}
+        // Renderiza a lista de jogos no admin
+        const renderAdminMatchList = () => {
+            adminMatchList.innerHTML = '';
+            getMatches().forEach((match, index) => {
+                const row = adminMatchList.insertRow();
+                row.innerHTML = `
+                    <td>${match.opponent}</td>
+                    <td>${match.result}</td>
+                    <td><button class="btn-remove" data-type="match" data-index="${index}">Remover</button></td>
+                `;
+            });
+        };
 
-h2 {
-    color: #e43f5a;
-    border-bottom: 2px solid #e43f5a;
-    padding-bottom: 5px;
-    margin-top: 0;
-}
+        // Evento: Adicionar ou Atualizar Jogador
+        playerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const playerName = document.getElementById('player-name').value;
+            const players = getPlayers();
+            const existingPlayerIndex = players.findIndex(p => p.name.toLowerCase() === playerName.toLowerCase());
+            
+            const playerData = {
+                name: playerName,
+                goals: parseInt(document.getElementById('goals').value),
+                assists: parseInt(document.getElementById('assists').value),
+                saves: parseInt(document.getElementById('saves').value),
+                dribbles: parseInt(document.getElementById('dribbles').value),
+            };
 
-h3 {
-    color: #e0e0e0;
-    margin-top: 20px;
-}
+            if (existingPlayerIndex > -1) {
+                players[existingPlayerIndex] = playerData; // Atualiza
+            } else {
+                players.push(playerData); // Adiciona
+            }
+            
+            savePlayers(players);
+            renderAdminPlayerList();
+            populateMatchForm();
+            playerForm.reset();
+        });
+        
+        // Evento: Adicionar Jogo
+        matchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const playerStatInputs = playerStatsForMatchDiv.querySelectorAll('.player-stat-input');
+            const playerStats = [];
+            
+            playerStatInputs.forEach(inputDiv => {
+                playerStats.push({
+                    name: inputDiv.querySelector('.player-name-hidden').value,
+                    goals: parseInt(inputDiv.querySelector('.player-goals').value),
+                    assists: parseInt(inputDiv.querySelector('.player-assists').value),
+                    saves: parseInt(inputDiv.querySelector('.player-saves').value),
+                    dribbles: parseInt(inputDiv.querySelector('.player-dribbles').value),
+                });
+            });
 
-.form-group {
-    margin-bottom: 15px;
-}
+            const newMatch = {
+                opponent: document.getElementById('opponent-name').value,
+                result: document.getElementById('match-result').value,
+                stats: playerStats,
+            };
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
+            const matches = getMatches();
+            matches.push(newMatch);
+            saveMatches(matches);
+            renderAdminMatchList();
+            matchForm.reset();
+            populateMatchForm(); // Reseta os valores dos inputs do formulário de jogo
+        });
 
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #415a77;
-    background-color: #0d1b2a;
-    color: #e0e0e0;
-    box-sizing: border-box;
-}
+        // Evento: Remover (Jogador ou Jogo)
+        document.querySelector('.container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-remove')) {
+                const type = e.target.getAttribute('data-type');
+                const index = parseInt(e.target.getAttribute('data-index'));
 
-#player-stats-for-match .player-stat-input {
-    border-left: 3px solid #e43f5a;
-    padding-left: 15px;
-    margin-bottom: 15px;
-}
+                if (type === 'player') {
+                    let players = getPlayers();
+                    players.splice(index, 1);
+                    savePlayers(players);
+                    renderAdminPlayerList();
+                    populateMatchForm();
+                } else if (type === 'match') {
+                    let matches = getMatches();
+                    matches.splice(index, 1);
+                    saveMatches(matches);
+                    renderAdminMatchList();
+                }
+            }
+        });
 
-#player-stats-for-match label {
-    font-size: 0.9em;
-}
+        // Cargas iniciais
+        renderAdminPlayerList();
+        populateMatchForm();
+        renderAdminMatchList();
+    }
 
-.btn, .btn-view {
-    display: inline-block;
-    width: 100%;
-    padding: 12px;
-    background-color: #e43f5a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    transition: background-color 0.3s;
-}
+    // LÓGICA DA PÁGINA PRINCIPAL
+    if (isMainPage) {
+        const playerRankingBody = document.getElementById('player-ranking').getElementsByTagName('tbody')[0];
+        const matchHistoryDiv = document.getElementById('match-history');
+        
+        // Renderiza o ranking de jogadores
+        const renderRanking = () => {
+            playerRankingBody.innerHTML = '';
+            getPlayers().forEach(player => {
+                const totalPoints = calculatePoints(player);
+                const status = totalPoints >= QUALIFICATION_AVERAGE ? 'Qualificado' : 'Não Qualificado';
+                const statusClass = totalPoints >= QUALIFICATION_AVERAGE ? 'status-qualified' : 'status-not-qualified';
 
-.btn:hover {
-    background-color: #b33045;
-}
+                const row = playerRankingBody.insertRow();
+                row.innerHTML = `
+                    <td>${player.name}</td>
+                    <td>${totalPoints.toFixed(1)}</td>
+                    <td class="${statusClass}">${status}</td>
+                `;
+            });
+        };
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        // Renderiza o histórico de jogos
+        const renderMatchHistory = () => {
+            matchHistoryDiv.innerHTML = '';
+            getMatches().reverse().forEach(match => { // .reverse() para mostrar o mais recente primeiro
+                let performancesHTML = '';
+                match.stats.filter(s => s.goals > 0 || s.assists > 0 || s.saves > 0 || s.dribbles > 0)
+                    .forEach(stat => {
+                        performancesHTML += `<li>${stat.name} (G: ${stat.goals}, A: ${stat.assists}, S: ${stat.saves}, D: ${stat.dribbles})</li>`;
+                });
 
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #415a77;
-}
+                if (performancesHTML) {
+                    performancesHTML = `<div class="player-performance"><ul>${performancesHTML}</ul></div>`;
+                } else {
+                    performancesHTML = `<div class="player-performance"><p>Nenhuma estatística registrada para esta partida.</p></div>`;
+                }
 
-thead {
-    background-color: #1f4068;
-}
-
-.btn-remove {
-    background-color: #772e2e;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.btn-remove:hover {
-    background-color: #5a2222;
-}
-
-.status-qualified {
-    color: #4CAF50;
-    font-weight: bold;
-}
-
-.status-not-qualified {
-    color: #f44336;
-    font-weight: bold;
-}
-
-.rules {
-    background-color: #1b263b;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.rules ul {
-    padding-left: 20px;
-    margin: 0;
-}
-
-.match-card {
-    background-color: #1f2a40;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.match-card h3 {
-    margin: 0 0 5px 0;
-    color: #e43f5a;
-}
-
-.match-card p {
-    margin: 0 0 10px 0;
-    font-weight: bold;
-}
-
-.player-performance {
-    font-size: 0.9em;
-    padding-left: 15px;
-    border-left: 2px solid #415a77;
-}
-
-footer {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.btn-view {
-    width: auto;
-    padding: 10px 20px;
-    background-color: #1f4068;
-}
-
-.btn-view:hover {
-    background-color: #2a5a8a;
-}
+                matchHistoryDiv.innerHTML += `
+                    <div class="match-card">
+                        <h3>vs ${match.opponent}</h3>
+                        <p>Resultado: ${match.result}</p>
+                        ${performancesHTML}
+                    </div>
+                `;
+            });
+        };
+        
+        // Cargas iniciais
+        renderRanking();
+        renderMatchHistory();
+    }
+});
