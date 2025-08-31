@@ -12,43 +12,42 @@
             <img src="https://i.imgur.com/g8e1a5j.png" alt="Logo The Comets" class="logo">
             <h1>Painel de Administração</h1>
         </header>
-
         <nav class="main-nav">
             <a href="index.html" class="nav-button">Classificação</a>
             <a href="jogos.html" class="nav-button">Histórico de Jogos</a>
             <a href="admin.html" class="nav-button active">Admin</a>
         </nav>
-
         <main>
             <div class="tab-navigation">
                 <button class="tab-button active" data-tab="players">Jogadores</button>
                 <button class="tab-button" data-tab="matches">Jogos</button>
             </div>
-
             <section id="players-content" class="tab-content active">
                 <div class="form-container">
                     <h2>Gerenciar Jogadores</h2>
                     <form id="add-player-form">
-                        <div class="form-group"><label for="player-name">Nome do Jogador:</label><input type="text" id="player-name" required></div>
-                        <div class="form-group"><label for="goals">Gols Totais:</label><input type="number" id="goals" min="0" value="0"></div>
-                        <div class="form-group"><label for="assists">Assistências Totais:</label><input type="number" id="assists" min="0" value="0"></div>
-                        <div class="form-group"><label for="saves">Salvos Totais:</label><input type="number" id="saves" min="0" value="0"></div>
-                        <div class="form-group"><label for="dribbles">Dribles Totais:</label><input type="number" id="dribbles" min="0" value="0"></div>
-                        <button type="submit" class="btn">Adicionar / Atualizar Jogador</button>
+                        <!-- Formulário de Jogador aqui -->
+                        <div class="form-group"><label for="player-name">Nome:</label><input type="text" id="player-name" required></div>
+                        <div class="form-group"><label for="goals">Gols:</label><input type="number" id="goals" min="0" value="0"></div>
+                        <div class="form-group"><label for="assists">Assist.:</label><input type="number" id="assists" min="0" value="0"></div>
+                        <div class="form-group"><label for="saves">Salvos:</label><input type="number" id="saves" min="0" value="0"></div>
+                        <div class="form-group"><label for="dribbles">Dribles:</label><input type="number" id="dribbles" min="0" value="0"></div>
+                        <button type="submit" class="btn">Adicionar / Atualizar</button>
                     </form>
+                    <button id="reset-data-button" class="btn btn-danger">Resetar Todos os Dados</button>
                 </div>
                 <div class="player-list-container">
                     <h2>Lista de Jogadores</h2>
-                    <table><thead><tr><th>Nome</th><th>Gols</th><th>Assist.</th><th>Salvos</th><th>Dribles</th><th>Ação</th></tr></thead><tbody id="admin-player-list-body"></tbody></table>
+                    <table><thead><tr><th>Nome</th><th>G</th><th>A</th><th>S</th><th>D</th><th>Ação</th></tr></thead><tbody id="admin-player-list-body"></tbody></table>
                 </div>
             </section>
-
             <section id="matches-content" class="tab-content">
                 <div class="form-container">
-                    <h2>Registrar Novo Jogo</h2>
+                    <h2>Registrar Jogo</h2>
                     <form id="add-match-form">
-                        <div class="form-group"><label for="opponent-name">Adversário:</label><input type="text" id="opponent-name" required></div>
-                        <div class="form-group"><label for="match-result">Resultado (ex: V 3-1):</label><input type="text" id="match-result" required></div>
+                        <!-- Formulário de Jogo aqui -->
+                         <div class="form-group"><label for="opponent-name">Adversário:</label><input type="text" id="opponent-name" required></div>
+                        <div class="form-group"><label for="match-result">Resultado:</label><input type="text" id="match-result" required placeholder="Ex: Vitória 3-1"></div>
                         <h3>Estatísticas da Partida:</h3>
                         <div id="player-stats-for-match"></div>
                         <button type="submit" class="btn">Salvar Jogo</button>
@@ -60,10 +59,7 @@
                 </div>
             </section>
         </main>
-        
-        <footer>
-            <p>&copy; 2025 The Comets (TCS). Desenvolvido com 💙</p>
-        </footer>
+        <footer><p>&copy; 2025 The Comets (TCS)</p></footer>
     </div>
     <div id="toast-notification" class="toast"></div>
     <script src="script.js"></script>
