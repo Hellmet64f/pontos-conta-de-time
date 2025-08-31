@@ -11,34 +11,35 @@
         <header>
             <img src="https://i.imgur.com/g8e1a5j.png" alt="Logo The Comets" class="logo">
             <h1>Painel de Administração</h1>
-            <p>Adicione e gerencie os jogadores do time.</p>
+            <p>Gerencie os jogadores e o histórico de jogos do time.</p>
         </header>
 
         <main>
+            <!-- SEÇÃO DE GERENCIAMENTO DE JOGADORES -->
             <div class="form-container">
-                <h2>Adicionar Novo Jogador</h2>
+                <h2>Gerenciar Jogadores (Estatísticas Totais)</h2>
                 <form id="add-player-form">
                     <div class="form-group">
                         <label for="player-name">Nome do Jogador:</label>
                         <input type="text" id="player-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="goals">Gols:</label>
+                        <label for="goals">Gols Totais:</label>
                         <input type="number" id="goals" min="0" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="assists">Assistências:</label>
+                        <label for="assists">Assistências Totais:</label>
                         <input type="number" id="assists" min="0" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="saves">Salvos (Defesas):</label>
+                        <label for="saves">Salvos Totais (Defesas):</label>
                         <input type="number" id="saves" min="0" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="dribbles">Dribles:</label>
+                        <label for="dribbles">Dribles Totais:</label>
                         <input type="number" id="dribbles" min="0" value="0">
                     </div>
-                    <button type="submit" class="btn">Adicionar Jogador</button>
+                    <button type="submit" class="btn">Adicionar / Atualizar Jogador</button>
                 </form>
             </div>
 
@@ -55,9 +56,41 @@
                             <th>Ação</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Jogadores serão inseridos aqui pelo JavaScript -->
-                    </tbody>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- SEÇÃO DE HISTÓRICO DE JOGOS -->
+            <div class="form-container">
+                <h2>Registrar Novo Jogo</h2>
+                <form id="add-match-form">
+                    <div class="form-group">
+                        <label for="opponent-name">Time Adversário:</label>
+                        <input type="text" id="opponent-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="match-result">Resultado (ex: Vitória 3-1):</label>
+                        <input type="text" id="match-result" required>
+                    </div>
+                    <h3>Estatísticas dos Jogadores na Partida:</h3>
+                    <div id="player-stats-for-match">
+                        <!-- Inputs para estatísticas dos jogadores serão gerados aqui -->
+                    </div>
+                    <button type="submit" class="btn">Salvar Jogo</button>
+                </form>
+            </div>
+
+             <div class="player-list-container">
+                <h2>Histórico de Jogos Registrados</h2>
+                <table id="admin-match-list">
+                    <thead>
+                        <tr>
+                            <th>Adversário</th>
+                            <th>Resultado</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
                 </table>
             </div>
         </main>
