@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    background-color: #162447;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    padding: 30px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #1f4068;
+    padding-bottom: 20px;
+}
+
+.logo {
+    max-width: 100px;
+    margin-bottom: 15px;
+}
+
+header h1 {
+    color: #e43f5a;
+    margin: 0;
+}
+
+.form-container, .player-list-container {
+    background-color: #1b263b;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #e43f5a;
+    border-bottom: 2px solid #e43f5a;
+    padding-bottom: 5px;
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #415a77;
+    background-color: #0d1b2a;
+    color: #e0e0e0;
+    box-sizing: border-box;
+}
+
+.btn, .btn-view {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    background-color: #e43f5a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #b33045;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #415a77;
+}
+
+thead {
+    background-color: #1f4068;
+}
+
+.btn-remove {
+    background-color: #772e2e;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background-color: #5a2222;
+}
+
+.status-qualified {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.status-not-qualified {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.rules {
+    background-color: #1b263b;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.rules ul {
+    padding-left: 20px;
+    margin: 0;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-view {
+    width: auto;
+    padding: 10px 20px;
+    background-color: #1f4068;
+}
+
+.btn-view:hover {
+    background-color: #2a5a8a;
+}
