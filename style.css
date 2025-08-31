@@ -40,22 +40,26 @@ h1.team-name { color: var(--text-lightest); font-size: 2.5rem; font-weight: 800;
 }
 .btn:hover { background-color: var(--primary-hover); transform: translateY(-3px) scale(1.05); box-shadow: 0 4px 20px rgba(34, 211, 238, 0.3); }
 .btn.btn-danger { background-color: var(--danger); color: white; }
+.btn.btn-warning { background-color: var(--warning); color: var(--bg-dark); }
 
-/* TABELAS E LISTAS */
-.leaderboard-list, .admin-roster-list { list-style: none; padding: 0; }
-.leaderboard-item, .admin-roster-item {
-    display: flex; align-items: center; padding: 1rem;
-    border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;
-}
-.leaderboard-item:last-child, .admin-roster-item:last-child { border-bottom: none; }
+
+/* LISTAS E TABELAS DO ADMIN */
+.leaderboard-list { list-style: none; padding: 0; }
+.admin-roster-list { list-style: none; padding: 0; }
+tbody#admin-roster-list tr { display: flex; align-items: center; padding: 0.5rem; border-bottom: 1px solid var(--border-color); }
+tbody#admin-roster-list tr:last-child { border-bottom: none; }
+.admin-roster-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+.admin-roster-item .btn { padding: 0.5rem; font-size: 0.8rem; border-radius: 8px; }
+
+/* TABELA DE CLASSIFICAÇÃO */
+.leaderboard-item { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
+.leaderboard-item:last-child { border-bottom: none; }
 .leaderboard-item:hover { background-color: var(--bg-light); cursor: pointer; border-radius: 8px;}
 
 /* REGRAS */
 .rules-list { list-style: none; padding-left: 0; }
 .rules-list li { margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative; }
-.rules-list li::before {
-    content: '★'; position: absolute; left: 0; color: var(--primary);
-}
+.rules-list li::before { content: '★'; position: absolute; left: 0; color: var(--primary); }
 
 
 /* ESTILOS DA CLASSIFICAÇÃO */
@@ -75,8 +79,6 @@ h1.team-name { color: var(--text-lightest); font-size: 2.5rem; font-weight: 800;
 .tab-button.active { color: var(--primary); border-bottom-color: var(--primary); }
 
 input[type="text"], input[type="number"] { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem; }
-.admin-roster-item .btn { padding: 0.5rem; margin-left: 0.5rem; font-size: 0.8rem; border-radius: 8px; }
-
 .stat-entry-list .player-name { width: 120px; flex-grow: 0; }
 .stat-entry-item { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
 .stat-input-group { display: flex; align-items: center; gap: 0.5rem; }
