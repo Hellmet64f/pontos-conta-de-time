@@ -8,7 +8,7 @@ body {
     padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Alterado para alinhar no topo */
+    align-items: flex-start;
     min-height: 100vh;
 }
 
@@ -19,14 +19,14 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     padding: 30px;
-    margin: 20px 0; /* Adicionado margem */
+    margin: 20px 0;
 }
 
 header {
     text-align: center;
-    margin-bottom: 30px;
-    border-bottom: 1px solid #1f4068;
+    margin-bottom: 20px;
     padding-bottom: 20px;
+    border-bottom: 1px solid #1f4068;
 }
 
 .logo {
@@ -39,159 +39,99 @@ header h1 {
     margin: 0;
 }
 
-.form-container, .player-list-container, .match-history-container {
-    background-color: #1b263b;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 25px;
+/* NAVEGAÇÃO PRINCIPAL */
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
 }
 
-h2 {
-    color: #e43f5a;
-    border-bottom: 2px solid #e43f5a;
-    padding-bottom: 5px;
-    margin-top: 0;
-}
-
-h3 {
+.nav-button {
+    background-color: #1f4068;
     color: #e0e0e0;
-    margin-top: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 10px;
+    padding: 10px 20px;
     border-radius: 5px;
-    border: 1px solid #415a77;
-    background-color: #0d1b2a;
-    color: #e0e0e0;
-    box-sizing: border-box;
-}
-
-#player-stats-for-match .player-stat-input {
-    border-left: 3px solid #e43f5a;
-    padding-left: 15px;
-    margin-bottom: 15px;
-}
-
-#player-stats-for-match label {
-    font-size: 0.9em;
-}
-
-.btn, .btn-view {
-    display: inline-block;
-    width: 100%;
-    padding: 12px;
-    background-color: #e43f5a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
     text-decoration: none;
+    font-weight: bold;
     transition: background-color 0.3s;
 }
 
-.btn:hover {
-    background-color: #b33045;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #415a77;
-}
-
-thead {
-    background-color: #1f4068;
-}
-
-.btn-remove {
-    background-color: #772e2e;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.btn-remove:hover {
-    background-color: #5a2222;
-}
-
-.status-qualified {
-    color: #4CAF50;
-    font-weight: bold;
-}
-
-.status-not-qualified {
-    color: #f44336;
-    font-weight: bold;
-}
-
-.rules {
-    background-color: #1b263b;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.rules ul {
-    padding-left: 20px;
-    margin: 0;
-}
-
-.match-card {
-    background-color: #1f2a40;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.match-card h3 {
-    margin: 0 0 5px 0;
-    color: #e43f5a;
-}
-
-.match-card p {
-    margin: 0 0 10px 0;
-    font-weight: bold;
-}
-
-.player-performance {
-    font-size: 0.9em;
-    padding-left: 15px;
-    border-left: 2px solid #415a77;
-}
-
-footer {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.btn-view {
-    width: auto;
-    padding: 10px 20px;
-    background-color: #1f4068;
-}
-
-.btn-view:hover {
+.nav-button:hover {
     background-color: #2a5a8a;
 }
+
+.nav-button.active {
+    background-color: #e43f5a;
+    color: white;
+}
+
+
+/* ABAS INTERNAS (SOMENTE ADMIN) */
+.tab-navigation {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #1f4068;
+}
+
+.tab-button {
+    padding: 10px 20px; cursor: pointer; background-color: transparent; border: none;
+    color: #e0e0e0; font-size: 16px; font-weight: bold; border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover { color: #e43f5a; }
+
+.tab-button.active { color: #e43f5a; border-bottom: 3px solid #e43f5a; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.form-container, .player-list-container, .match-history-container {
+    background-color: #1b263b; padding: 20px; border-radius: 8px; margin-bottom: 25px;
+}
+
+h2 { color: #e43f5a; border-bottom: 2px solid #e43f5a; padding-bottom: 5px; margin-top: 0; }
+h3 { color: #e0e0e0; margin-top: 20px; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+.form-group input {
+    width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #415a77;
+    background-color: #0d1b2a; color: #e0e0e0; box-sizing: border-box;
+}
+
+#player-stats-for-match .player-stat-input {
+    border-left: 3px solid #e43f5a; padding-left: 15px; margin-bottom: 15px;
+}
+#player-stats-for-match label { font-size: 0.9em; }
+
+.btn {
+    display: inline-block; width: 100%; padding: 12px; background-color: #e43f5a;
+    color: white; border: none; border-radius: 5px; font-size: 16px;
+    font-weight: bold; cursor: pointer; text-align: center; text-decoration: none;
+    transition: background-color 0.3s;
+}
+.btn:hover { background-color: #b33045; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #415a77; }
+thead { background-color: #1f4068; }
+
+.btn-remove {
+    background-color: #772e2e; color: white; padding: 5px 10px; border: none;
+    border-radius: 5px; cursor: pointer;
+}
+.btn-remove:hover { background-color: #5a2222; }
+
+.status-qualified { color: #4CAF50; font-weight: bold; }
+.status-not-qualified { color: #f44336; font-weight: bold; }
+
+.rules { background-color: #1b263b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.rules ul { padding-left: 20px; margin: 0; }
+
+.match-card { background-color: #1f2a40; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+.match-card h3 { margin: 0 0 5px 0; color: #e43f5a; }
+.match-card p { margin: 0 0 10px 0; font-weight: bold; }
+.player-performance { font-size: 0.9em; padding-left: 15px; border-left: 2px solid #415a77; }
