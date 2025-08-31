@@ -20,14 +20,12 @@
         </nav>
 
         <main>
-            <!-- Abas internas do Admin -->
             <div class="tab-navigation">
                 <button class="tab-button active" data-tab="players">Jogadores</button>
                 <button class="tab-button" data-tab="matches">Jogos</button>
             </div>
 
-            <!-- Conteúdo da Aba JOGADORES -->
-            <div id="players-content" class="tab-content active">
+            <section id="players-content" class="tab-content active">
                 <div class="form-container">
                     <h2>Gerenciar Jogadores</h2>
                     <form id="add-player-form">
@@ -41,15 +39,11 @@
                 </div>
                 <div class="player-list-container">
                     <h2>Lista de Jogadores</h2>
-                    <table id="admin-player-table">
-                        <thead><tr><th>Nome</th><th>Gols</th><th>Assist.</th><th>Salvos</th><th>Dribles</th><th>Ação</th></tr></thead>
-                        <tbody id="admin-player-list-body"></tbody>
-                    </table>
+                    <table><thead><tr><th>Nome</th><th>Gols</th><th>Assist.</th><th>Salvos</th><th>Dribles</th><th>Ação</th></tr></thead><tbody id="admin-player-list-body"></tbody></table>
                 </div>
-            </div>
+            </section>
 
-            <!-- Conteúdo da Aba JOGOS -->
-            <div id="matches-content" class="tab-content">
+            <section id="matches-content" class="tab-content">
                 <div class="form-container">
                     <h2>Registrar Novo Jogo</h2>
                     <form id="add-match-form">
@@ -62,14 +56,16 @@
                 </div>
                  <div class="player-list-container">
                     <h2>Histórico de Jogos</h2>
-                    <table id="admin-match-table">
-                        <thead><tr><th>Adversário</th><th>Resultado</th><th>Ação</th></tr></thead>
-                        <tbody id="admin-match-list-body"></tbody>
-                    </table>
+                    <table><thead><tr><th>Adversário</th><th>Resultado</th><th>Ação</th></tr></thead><tbody id="admin-match-list-body"></tbody></table>
                 </div>
-            </div>
+            </section>
         </main>
+        
+        <footer>
+            <p>&copy; 2025 The Comets (TCS). Desenvolvido com 💙</p>
+        </footer>
     </div>
+    <div id="toast-notification" class="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
