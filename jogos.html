@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Comets (TCS) - Histórico de Jogos</title>
+    <title>The Comets (TCS) - Histórico</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,23 +12,20 @@
             <img src="https://i.imgur.com/g8e1a5j.png" alt="Logo The Comets" class="logo">
             <h1>The Comets (TCS)</h1>
         </header>
-
         <nav class="main-nav">
             <a href="index.html" class="nav-button">Classificação</a>
             <a href="jogos.html" class="nav-button active">Histórico de Jogos</a>
             <a href="admin.html" class="nav-button">Admin</a>
         </nav>
-
         <main>
-            <section id="match-history-container" class="match-history-container">
+            <section class="match-history-container">
                 <h2>Histórico de Partidas</h2>
-                <!-- O histórico será inserido aqui -->
+                <div id="match-list-content">
+                    <!-- O histórico será inserido aqui -->
+                </div>
             </section>
         </main>
-
-        <footer>
-            <p>&copy; 2025 The Comets (TCS). Desenvolvido com 💙</p>
-        </footer>
+        <footer><p>&copy; 2025 The Comets (TCS)</p></footer>
     </div>
     <div id="toast-notification" class="toast"></div>
     <script src="script.js"></script>
