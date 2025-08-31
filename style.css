@@ -1,186 +1,217 @@
-/* Importa uma fonte do Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+// Aguarda o HTML da página ser completamente carregado para executar o script
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // =================================================================================
+    // CONFIGURAÇÕES GLOBAIS E FUNÇÕES DE DADOS
+    // =================================================================================
+    
+    const QUALIFICATION_AVERAGE = 4.5;
 
-/* Configurações globais */
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #1a1a2e; /* Azul escuro */
-    color: #e0e0e0; /* Cinza claro */
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-}
+    // Funções para ler e salvar dados no armazenamento local do navegador
+    const getPlayers = () => JSON.parse(localStorage.getItem('tcsPlayers')) || [];
+    const savePlayers = (players) => localStorage.setItem('tcsPlayers', JSON.stringify(players));
+    const getMatches = () => JSON.parse(localStorage.getItem('tcsMatches')) || [];
+    const saveMatches = (matches) => localStorage.setItem('tcsMatches', JSON.stringify(matches));
 
-/* Container principal que centraliza o conteúdo */
-.container {
-    width: 100%;
-    max-width: 900px;
-    background-color: #162447; /* Azul médio */
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    padding: 30px;
-    margin: 20px 0;
-}
+    // Função que calcula a pontuação total de um jogador
+    const calculatePoints = (player) => {
+        let points = (player.goals * 3) + (player.saves * 2);
+        points += Math.floor(player.assists / 7);
+        points += Math.floor(player.dribbles / 5);
+        return points;
+    };
 
-/* Cabeçalho com logo e título */
-header {
-    text-align: center;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #1f4068; /* Azul acinzentado */
-}
+    // =================================================================================
+    // IDENTIFICAÇÃO DA PÁGINA ATUAL
+    // =================================================================================
 
-.logo {
-    max-width: 100px;
-    margin-bottom: 15px;
-}
+    const pageRankingBody = document.getElementById('player-ranking-body');
+    const pageHistoryContainer = document.getElementById('match-history-container');
+    const pageAdminForm = document.getElementById('add-player-form');
 
-header h1 {
-    color: #e43f5a; /* Vermelho vibrante */
-    margin: 0;
-}
+    // =================================================================================
+    // LÓGICA DA PÁGINA DE CLASSIFICAÇÃO (INDEX.HTML)
+    // =================================================================================
+    
+    if (pageRankingBody) {
+        const players = getPlayers();
 
-/* Navegação principal (entre páginas) */
-.main-nav {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 30px;
-}
+        if (players.length === 0) {
+            // Se não houver jogadores, exibe uma mensagem clara
+            pageRankingBody.innerHTML = `<tr><td colspan="3" class="empty-message">Nenhum jogador cadastrado. Adicione na página de Admin.</td></tr>`;
+        } else {
+            players.forEach(player => {
+                const totalPoints = calculatePoints(player);
+                const status = totalPoints >= QUALIFICATION_AVERAGE ? 'Qualificado' : 'Não Qualificado';
+                const statusClass = totalPoints >= QUALIFICATION_AVERAGE ? 'status-qualified' : 'status-not-qualified';
+                
+                const row = pageRankingBody.insertRow();
+                row.innerHTML = `<td>${player.name}</td><td>${totalPoints.toFixed(1)}</td><td class="${statusClass}">${status}</td>`;
+            });
+        }
+    }
 
-.nav-button {
-    background-color: #1f4068;
-    color: #e0e0e0;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
+    // =================================================================================
+    // LÓGICA DA PÁGINA DE HISTÓRICO (JOGOS.HTML)
+    // =================================================================================
+    
+    if (pageHistoryContainer) {
+        const matches = getMatches();
 
-.nav-button:hover {
-    background-color: #2a5a8a; /* Azul mais claro */
-}
+        if (matches.length === 0) {
+            // Se não houver jogos, exibe uma mensagem clara
+            pageHistoryContainer.innerHTML = `<p class="empty-message">Nenhum jogo registrado. Adicione na página de Admin.</p>`;
+        } else {
+            pageHistoryContainer.innerHTML = ''; // Limpa antes de adicionar
+            matches.slice().reverse().forEach(match => {
+                const performancesHTML = match.stats
+                    .filter(s => s.goals > 0 || s.assists > 0 || s.saves > 0 || s.dribbles > 0)
+                    .map(stat => `<li>${stat.name} (G: ${stat.goals}, A: ${stat.assists}, S: ${stat.saves}, D: ${stat.dribbles})</li>`)
+                    .join('');
 
-.nav-button.active {
-    background-color: #e43f5a;
-    color: white;
-}
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+                matchCard.innerHTML = `
+                    <h3>vs ${match.opponent}</h3>
+                    <p>Resultado: ${match.result}</p>
+                    ${performancesHTML ? `<div class="player-performance"><ul>${performancesHTML}</ul></div>` : ''}
+                `;
+                pageHistoryContainer.appendChild(matchCard);
+            });
+        }
+    }
 
-/* Abas internas (apenas na página de Admin) */
-.tab-navigation {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #1f4068;
-}
+    // =================================================================================
+    // LÓGICA DA PÁGINA DE ADMIN (ADMIN.HTML)
+    // =================================================================================
+    
+    if (pageAdminForm) {
+        // --- Gerenciamento das Abas ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                tabContents.forEach(content => {
+                    content.classList.toggle('active', content.id === `${button.dataset.tab}-content`);
+                });
+            });
+        });
 
-.tab-button {
-    padding: 10px 20px;
-    cursor: pointer;
-    background-color: transparent;
-    border: none;
-    color: #e0e0e0;
-    font-size: 16px;
-    font-weight: bold;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-}
+        // --- Elementos do DOM ---
+        const playerForm = document.getElementById('add-player-form');
+        const adminPlayerListBody = document.getElementById('admin-player-list-body');
+        const matchForm = document.getElementById('add-match-form');
+        const playerStatsForMatchDiv = document.getElementById('player-stats-for-match');
+        const adminMatchListBody = document.getElementById('admin-match-list-body');
 
-.tab-button:hover {
-    color: #e43f5a;
-}
+        // --- Funções de Renderização do Admin ---
+        const renderAdminPlayers = () => {
+            adminPlayerListBody.innerHTML = '';
+            const players = getPlayers();
+            if (players.length === 0) {
+                adminPlayerListBody.innerHTML = `<tr><td colspan="6" class="empty-message">Nenhum jogador cadastrado.</td></tr>`;
+            } else {
+                players.forEach((p, i) => {
+                    adminPlayerListBody.insertRow().innerHTML = `<td>${p.name}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.saves}</td><td>${p.dribbles}</td><td><button class="btn-remove" data-type="player" data-index="${i}">Remover</button></td>`;
+                });
+            }
+        };
 
-.tab-button.active {
-    color: #e43f5a;
-    border-bottom: 3px solid #e43f5a;
-}
+        const renderAdminMatches = () => {
+            adminMatchListBody.innerHTML = '';
+            const matches = getMatches();
+             if (matches.length === 0) {
+                adminMatchListBody.innerHTML = `<tr><td colspan="3" class="empty-message">Nenhum jogo registrado.</td></tr>`;
+            } else {
+                matches.forEach((m, i) => {
+                    adminMatchListBody.insertRow().innerHTML = `<td>${m.opponent}</td><td>${m.result}</td><td><button class="btn-remove" data-type="match" data-index="${i}">Remover</button></td>`;
+                });
+            }
+        };
+        
+        const populateMatchForm = () => {
+            playerStatsForMatchDiv.innerHTML = '';
+            const players = getPlayers();
+            if (players.length === 0) {
+                playerStatsForMatchDiv.innerHTML = `<p class="empty-message">Adicione jogadores na aba "Jogadores" primeiro.</p>`;
+                return;
+            }
+            players.forEach(p => {
+                playerStatsForMatchDiv.innerHTML += `<div class="player-stat-input"><h4>${p.name}</h4><input type="hidden" value="${p.name}"><label>Gols:</label><input type="number" class="match-goals" value="0" min="0"><label>Assist.:</label><input type="number" class="match-assists" value="0" min="0"><label>Salvos:</label><input type="number" class="match-saves" value="0" min="0"><label>Dribles:</label><input type="number" class="match-dribbles" value="0" min="0"></div>`;
+            });
+        };
 
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+        // --- Eventos (Ações do Usuário) ---
+        playerForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const playerName = document.getElementById('player-name').value.trim();
+            let players = getPlayers();
+            const existingPlayerIndex = players.findIndex(p => p.name.toLowerCase() === playerName.toLowerCase());
+            
+            const playerData = { 
+                name: playerName, 
+                goals: parseInt(document.getElementById('goals').value) || 0, 
+                assists: parseInt(document.getElementById('assists').value) || 0, 
+                saves: parseInt(document.getElementById('saves').value) || 0, 
+                dribbles: parseInt(document.getElementById('dribbles').value) || 0
+            };
 
-/* Estilos para containers de formulário e listas */
-.form-container, .player-list-container, .match-history-container, .rules {
-    background-color: #1b263b; /* Azul bem escuro */
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-}
+            if (existingPlayerIndex > -1) players[existingPlayerIndex] = playerData; // Atualiza
+            else players.push(playerData); // Adiciona
 
-h2 {
-    color: #e43f5a;
-    border-bottom: 2px solid #e43f5a;
-    padding-bottom: 5px;
-    margin-top: 0;
-}
+            savePlayers(players);
+            renderAdminPlayers();
+            populateMatchForm();
+            playerForm.reset();
+        });
 
-/* Formulários */
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #415a77;
-    background-color: #0d1b2a;
-    color: #e0e0e0;
-    box-sizing: border-box;
-}
+        matchForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const playerStats = Array.from(playerStatsForMatchDiv.querySelectorAll('.player-stat-input')).map(div => ({
+                name: div.querySelector('input[type="hidden"]').value,
+                goals: parseInt(div.querySelector('.match-goals').value) || 0,
+                assists: parseInt(div.querySelector('.match-assists').value) || 0,
+                saves: parseInt(div.querySelector('.match-saves').value) || 0,
+                dribbles: parseInt(div.querySelector('.match-dribbles').value) || 0
+            }));
+            
+            const newMatch = { 
+                opponent: document.getElementById('opponent-name').value, 
+                result: document.getElementById('match-result').value, 
+                stats: playerStats 
+            };
+            
+            saveMatches([...getMatches(), newMatch]);
+            renderAdminMatches();
+            matchForm.reset();
+            populateMatchForm(); // Resetar os valores do formulário
+        });
 
-/* Botões */
-.btn {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background-color: #e43f5a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s;
-}
-.btn:hover { background-color: #b33045; }
+        document.querySelector('.container').addEventListener('click', e => {
+            if (e.target.classList.contains('btn-remove')) {
+                const type = e.target.dataset.type;
+                const index = parseInt(e.target.dataset.index);
+                
+                if (type === 'player') {
+                    let players = getPlayers();
+                    players.splice(index, 1);
+                    savePlayers(players);
+                    renderAdminPlayers();
+                    populateMatchForm();
+                } else if (type === 'match') {
+                    let matches = getMatches();
+                    matches.splice(index, 1);
+                    saveMatches(matches);
+                    renderAdminMatches();
+                }
+            }
+        });
 
-.btn-remove {
-    background-color: #772e2e; /* Vermelho escuro */
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-.btn-remove:hover { background-color: #5a2222; }
-
-/* Tabelas */
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 12px; text-align: left; border-bottom: 1px solid #415a77; }
-thead { background-color: #1f4068; }
-
-/* Status de Qualificação */
-.status-qualified { color: #4CAF50; font-weight: bold; } /* Verde */
-.status-not-qualified { color: #f44336; font-weight: bold; } /* Vermelho */
-
-/* Cards de Histórico de Jogo */
-.match-card {
-    background-color: #1f2a40;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-.match-card h3 { margin: 0 0 5px 0; color: #e43f5a; }
-.match-card p { margin: 0 0 10px 0; font-weight: bold; }
-.player-performance ul { padding-left: 20px; margin: 0; }
-
-/* Mensagem de "vazio" */
-.empty-message {
-    text-align: center;
-    padding: 20px;
-    color: #aaa;
-    font-style: italic;
-}
+        // --- Carga Inicial do Admin ---
+        renderAdminPlayers();
+        renderAdminMatches();
+        populateMatchForm();
+    }
+});
