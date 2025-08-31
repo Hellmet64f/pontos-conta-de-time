@@ -24,7 +24,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerRankingBody = pageRanking.getElementsByTagName('tbody')[0];
         const renderRanking = () => {
             playerRankingBody.innerHTML = '';
-            getPlayers().forEach(player => {
+            const players = getPlayers(); // Pega os jogadores
+
+            // ---- MELHORIA AQUI ----
+            if (players.length === 0) {
+                // Se não houver jogadores, exibe uma mensagem
+                const row = playerRankingBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 3; // Ocupa as 3 colunas da tabela
+                cell.textContent = 'Nenhum jogador cadastrado. Adicione jogadores na página de Admin.';
+                cell.style.textAlign = 'center';
+                return;
+            }
+            // ---- FIM DA MELHORIA ----
+
+            players.forEach(player => {
                 const totalPoints = calculatePoints(player);
                 const status = totalPoints >= QUALIFICATION_AVERAGE ? 'Qualificado' : 'Não Qualificado';
                 const statusClass = totalPoints >= QUALIFICATION_AVERAGE ? 'status-qualified' : 'status-not-qualified';
@@ -40,11 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const renderMatchHistory = () => {
             pageHistory.innerHTML = '';
             const matches = getMatches();
+            
+            // A mensagem para histórico vazio já existia e está correta.
             if (matches.length === 0) {
-                pageHistory.innerHTML = '<p>Nenhum jogo foi registrado ainda. Vá para a página de Admin para adicionar.</p>';
+                pageHistory.innerHTML = '<p style="text-align: center;">Nenhum jogo foi registrado ainda. Vá para a página de Admin para adicionar.</p>';
                 return;
             }
-            matches.slice().reverse().forEach(match => { // .slice() para não alterar o array original
+
+            matches.slice().reverse().forEach(match => {
                 let performancesHTML = match.stats
                     .filter(s => s.goals > 0 || s.assists > 0 || s.saves > 0 || s.dribbles > 0)
                     .map(stat => `<li>${stat.name} (G: ${stat.goals}, A: ${stat.assists}, S: ${stat.saves}, D: ${stat.dribbles})</li>`)
@@ -75,27 +92,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Referências a elementos do Admin
+        // O resto do código do Admin continua o mesmo...
         const playerForm = document.getElementById('add-player-form');
         const adminPlayerList = document.getElementById('admin-player-list').getElementsByTagName('tbody')[0];
         const matchForm = document.getElementById('add-match-form');
         const playerStatsForMatchDiv = document.getElementById('player-stats-for-match');
         const adminMatchList = document.getElementById('admin-match-list').getElementsByTagName('tbody')[0];
 
-        // Funções de renderização do Admin
-        const renderAdminPlayerList = () => { /* ... (código abaixo) ... */ };
-        const populateMatchForm = () => { /* ... (código abaixo) ... */ };
-        const renderAdminMatchList = () => { /* ... (código abaixo) ... */ };
-        
-        // ... (Implementação das funções e eventos do admin aqui)
-        renderAdminPlayerList = () => {
+        const renderAdminPlayerList = () => {
             adminPlayerList.innerHTML = '';
             getPlayers().forEach((p, i) => {
                 adminPlayerList.insertRow().innerHTML = `<td>${p.name}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.saves}</td><td>${p.dribbles}</td><td><button class="btn-remove" data-type="player" data-index="${i}">Remover</button></td>`;
             });
         };
 
-        populateMatchForm = () => {
+        const populateMatchForm = () => {
             playerStatsForMatchDiv.innerHTML = '';
             const players = getPlayers();
             if (players.length === 0) {
@@ -107,14 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        renderAdminMatchList = () => {
+        const renderAdminMatchList = () => {
             adminMatchList.innerHTML = '';
             getMatches().forEach((m, i) => {
                 adminMatchList.insertRow().innerHTML = `<td>${m.opponent}</td><td>${m.result}</td><td><button class="btn-remove" data-type="match" data-index="${i}">Remover</button></td>`;
             });
         };
 
-        // Event Listeners
         playerForm.addEventListener('submit', e => {
             e.preventDefault();
             const playerName = document.getElementById('player-name').value;
@@ -160,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Carga inicial do Admin
         renderAdminPlayerList();
         populateMatchForm();
         renderAdminMatchList();
