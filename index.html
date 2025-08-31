@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Comets (TCS) - Dashboard</title>
+    
+    <!-- Ícone da Aba -->
+    <link rel="icon" href="https://i.imgur.com/g8e1a5j.png" type="image/png">
+    
+    <!-- Link para o Arquivo de Estilo -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- CABEÇALHO -->
+        <header>
+            <img src="https://i.imgur.com/g8e1a5j.png" alt="Logo The Comets" class="logo">
+            <h1 class="team-name">The Comets (TCS)</h1>
+        </header>
+
+        <main>
+            <!-- BOTÃO FLUTUANTE DO ADMIN -->
+            <button id="admin-toggle-button" class="btn admin-toggle">Admin</button>
+
+            <!-- PAINEL DO ADMIN (ESCONDIDO) -->
+            <section id="admin-panel" class="card">
+                <div class="admin-tabs">
+                    <button class="tab-button active" data-tab="tab-roster">Gerenciar Elenco</button>
+                    <button class="tab-button" data-tab="tab-stats">Lançar Estatísticas</button>
+                </div>
+
+                <!-- Aba de Gerenciar Elenco -->
+                <div id="tab-roster" class="tab-content active">
+                    <h2>Adicionar Jogador ao Elenco</h2>
+                    <form id="add-player-form" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                        <input type="text" id="new-player-name" placeholder="Nome do novo jogador" required style="flex-grow: 1;">
+                        <button type="submit" class="btn">Adicionar</button>
+                    </form>
+                    <ul id="admin-roster-list" class="admin-roster-list"></ul>
+                    <button id="reset-all-data" class="btn btn-danger" style="margin-top: 2rem;">Resetar TUDO (Jogadores e Stats)</button>
+                </div>
+
+                <!-- Aba de Lançar Estatísticas -->
+                <div id="tab-stats" class="tab-content">
+                    <h2>Lançar Stats da Partida/Sessão</h2>
+                    <div id="stat-entry-list" class="stat-entry-list"></div>
+                    <button id="save-stats-button" class="btn" style="margin-top: 1rem; background-color: var(--success);">Salvar Stats da Sessão</button>
+                </div>
+            </section>
+            
+            <!-- CLASSIFICAÇÃO PÚBLICA -->
+            <section class="card">
+                <h2>Classificação Geral</h2>
+                <div id="leaderboard-list" class="leaderboard-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL (PERFIL DO JOGADOR) -->
+    <div id="player-modal" class="modal-overlay">
+        <div class="modal">
+            <button id="modal-close-button" class="modal-close">&times;</button>
+            <div id="modal-content">
+                <!-- Conteúdo dinâmico aqui -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Link para o Arquivo de Lógica -->
+    <script src="script.js"></script>
+</body>
+</html>
