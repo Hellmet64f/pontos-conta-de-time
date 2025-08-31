@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const STORAGE_KEYS = { roster: 'tcs_roster_v3', stats: 'tcs_stats_v3' };
-    const QUALIFICATION_AVERAGE = 6.0;
+    const QUALIFICATION_AVERAGE = 15.0; // Média atualizada para 15
+    const PRIZE_THRESHOLD = 100; // Limite de pontos para o prêmio
 
     // === 1. FUNÇÕES DE DADOS E CÁLCULO (LÓGICA ATUALIZADA) ===
     const getRoster = () => JSON.parse(localStorage.getItem(STORAGE_KEYS.roster)) || [];
@@ -11,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calculatePoints = (playerId, stats) => {
         const playerStats = stats[playerId] || { goals: 0, assists: 0, saves: 0, dribbles: 0 };
-        // --- LÓGICA DE PONTOS ATUALIZADA ---
         const goalPoints = (playerStats.goals || 0) * 0.3;
         const assistPoints = (playerStats.assists || 0) * 0.2;
         const savePoints = (playerStats.saves || 0) * 0.8;
@@ -28,20 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderLeaderboard = () => {
         const leaderboardList = document.getElementById('leaderboard-list');
-        // (código sem alterações...)
-        const roster = getRoster(); const stats = getStats(); leaderboardList.innerHTML = '';
-        if (roster.length === 0) { leaderboardList.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum jogador no elenco. Adicione no painel Admin.</p>'; return; }
-        const rankedPlayers = roster.map(player => ({ ...player, points: calculatePoints(player.id, stats) })).sort((a, b) => b.points - a.points);
+        const roster = getRoster(); const stats = getStats();
+        leaderboardList.innerHTML = '';
+
+        if (roster.length === 0) {
+            leaderboardList.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum jogador no elenco. Adicione no painel Admin.</p>';
+            return;
+        }
+
+        const rankedPlayers = roster.map(player => ({
+            ...player,
+            points: calculatePoints(player.id, stats)
+        })).sort((a, b) => b.points - a.points);
+
         rankedPlayers.forEach((player, index) => {
-            const isRank1 = index === 0; const item = document.createElement('div'); item.className = `leaderboard-item ${isRank1 ? 'rank-1' : ''}`;
-            item.dataset.playerId = player.id; item.innerHTML = `<div class="pos">${isRank1 ? '👑' : `${index + 1}º`}</div><div class="player-name">${player.name}</div><div class="player-points">${player.points.toFixed(1)} pts</div>`;
+            const isRank1 = index === 0;
+            const hasPrize = player.points >= PRIZE_THRESHOLD;
+            const prizeIcon = hasPrize ? '<span class="prize-icon" title="Ganhou 100 Robux!">🏆</span>' : '';
+
+            const item = document.createElement('div');
+            item.className = `leaderboard-item ${isRank1 ? 'rank-1' : ''}`;
+            item.dataset.playerId = player.id;
+            item.innerHTML = `
+                <div class="pos">${isRank1 ? '👑' : `${index + 1}º`}</div>
+                <div class="player-name">${player.name} ${prizeIcon}</div>
+                <div class="player-points">${player.points.toFixed(1)} pts</div>
+            `;
             leaderboardList.appendChild(item);
         });
     };
 
     const renderAdminRoster = () => {
         const rosterList = document.getElementById('admin-roster-list');
-        // (código com novo botão de reset)
         const roster = getRoster(); rosterList.innerHTML = '';
         roster.forEach((player) => {
             const row = document.createElement('tr'); row.innerHTML = `
@@ -58,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderStatEntryForm = () => {
         const statEntryList = document.getElementById('stat-entry-list');
-        // (código sem alterações...)
         const roster = getRoster(); statEntryList.innerHTML = '';
         roster.forEach(player => {
             const item = document.createElement('div'); item.className = 'stat-entry-item'; item.dataset.playerId = player.id;
@@ -71,10 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const roster = getRoster(); const stats = getStats(); const player = roster.find(p => p.id === playerId); if (!player) return;
         const playerStats = stats[playerId] || { goals: 0, assists: 0, saves: 0, dribbles: 0 };
         const points = calculatePoints(playerId, stats);
+        
+        const prizeBanner = points >= PRIZE_THRESHOLD ? '<div class="modal-prize-banner">🏆 Prêmio Conquistado: 100 Robux!</div>' : '';
+
         const modalContent = document.getElementById('modal-content'); const statsArray = [playerStats.goals, playerStats.assists, playerStats.saves, playerStats.dribbles];
         const maxStat = Math.max(...statsArray, 1);
         modalContent.innerHTML = `
             <div class="modal-header"><h3>${player.name}</h3><p>${points.toFixed(1)} Pontos</p></div>
+            ${prizeBanner}
             <div class="stat-graph">
                 <div class="bar-container"><div class="stat-bar" style="height:${(playerStats.goals/maxStat)*100}%; background-color:#f43f5e;" title="${playerStats.goals} Gols">${playerStats.goals}</div><div class="bar-label">Gols</div></div>
                 <div class="bar-container"><div class="stat-bar" style="height:${(playerStats.assists/maxStat)*100}%; background-color:#3b82f6;" title="${playerStats.assists} Assist.">${playerStats.assists}</div><div class="bar-label">Assist.</div></div>
@@ -100,33 +121,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newName) { const roster = getRoster(); roster.push({ id: Date.now().toString(), name: newName }); saveRoster(roster); renderAll(); input.value = ''; }
     });
     
-    // --- LÓGICA DE AÇÕES NO ELENCO (ATUALIZADA) ---
     document.getElementById('admin-roster-list').addEventListener('click', e => {
-        const roster = getRoster(); const stats = getStats(); const id = e.target.dataset.id;
+        const targetButton = e.target.closest('button');
+        if (!targetButton) return;
         
-        // Excluir Jogador
-        if (e.target.matches('.btn-danger')) {
+        const roster = getRoster(); const stats = getStats(); const id = targetButton.dataset.id;
+        
+        if (targetButton.matches('.btn-danger')) {
             if (confirm('Tem certeza? Isso removerá o jogador e todas as suas estatísticas permanentemente.')) {
                 saveRoster(roster.filter(p => p.id !== id));
                 delete stats[id]; saveStats(stats); renderAll();
             }
         }
-        // Editar Nome
-        if (e.target.matches('.btn:not(.btn-danger):not(.btn-warning)')) { // Editar
+        else if (targetButton.matches('.btn-warning')) {
+             if (confirm('Tem certeza que deseja resetar as estatísticas deste jogador? (Gols, assistências, etc. voltarão para 0).')) {
+                if(stats[id]) { stats[id] = { goals: 0, assists: 0, saves: 0, dribbles: 0 }; saveStats(stats); }
+                renderAll(); alert('Estatísticas do jogador resetadas com sucesso!');
+            }
+        }
+        else { // Botão de Editar
             const player = roster.find(p => p.id === id);
             const newName = prompt('Digite o novo nome para:', player.name);
             if (newName && newName.trim()) { player.name = newName.trim(); saveRoster(roster); renderAll(); }
-        }
-        // --- NOVA LÓGICA PARA RESETAR STATS ---
-        if (e.target.matches('.btn-warning')) {
-            if (confirm('Tem certeza que deseja resetar as estatísticas deste jogador? (Gols, assistências, etc. voltarão para 0).')) {
-                if(stats[id]) { // Se o jogador tiver stats, reseta eles
-                    stats[id] = { goals: 0, assists: 0, saves: 0, dribbles: 0 };
-                    saveStats(stats);
-                }
-                renderAll(); // Atualiza a tela
-                alert('Estatísticas do jogador resetadas com sucesso!');
-            }
         }
     });
 
@@ -160,4 +176,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // === 4. CARGA INICIAL ===
     renderAll();
-});
+});```
