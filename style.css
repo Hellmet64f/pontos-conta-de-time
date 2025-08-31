@@ -7,6 +7,8 @@
     --color-primary: #f43f5e; /* Rosa vibrante */
     --color-primary-dark: #be185d;
     --color-secondary: #3b82f6; /* Azul secundário */
+    --color-success: #22c55e;
+    --color-danger: #ef4444;
     --color-text-header: #f9fafb;
     --color-text-body: #d1d5db;
     --color-text-muted: #9ca3af;
@@ -45,12 +47,7 @@ body {
     margin: 20px 0;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 25px;
-    padding-bottom: 25px;
-    border-bottom: 1px solid var(--color-border);
-}
+header { text-align: center; margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid var(--color-border); }
 .logo { max-width: 110px; transition: transform 0.3s ease; }
 .logo:hover { transform: scale(1.05) rotate(-3deg); }
 header h1 { color: var(--color-text-header); font-weight: 700; }
@@ -104,6 +101,17 @@ h2 { color: var(--color-text-header); border-bottom: 1px solid var(--color-borde
 }
 .btn:hover { background-color: var(--color-primary-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); }
 
+/* --- NOVO E MELHORADO ESTILO DO BOTÃO REMOVER --- */
+.btn-remove {
+    background-color: var(--color-danger);
+    color: white; border: none; border-radius: 50%; width: 28px; height: 28px;
+    cursor: pointer; font-weight: bold; font-family: monospace; font-size: 1.2rem;
+    display: flex; justify-content: center; align-items: center;
+    transition: all 0.3s ease;
+}
+.btn-remove:hover { background-color: #ff5252; transform: scale(1.1) rotate(90deg); }
+
+
 table { width: 100%; border-collapse: collapse; }
 thead tr { border-bottom: 2px solid var(--color-border); }
 th { padding: 15px; text-align: left; font-weight: 600; color: var(--color-text-header); }
@@ -115,8 +123,8 @@ tbody tr:last-child td { border-bottom: none; }
 /* =================================================================== */
 /* 4. ELEMENTOS ESPECÍFICOS E NOTIFICAÇÕES                            */
 /* =================================================================== */
-.status-qualified { color: #22c55e; font-weight: 600; } /* Verde */
-.status-not-qualified { color: #ef4444; font-weight: 600; } /* Vermelho */
+.status-qualified { color: var(--color-success); font-weight: 600; }
+.status-not-qualified { color: var(--color-danger); font-weight: 600; }
 
 .match-card {
     background-color: rgba(0,0,0,0.2); border-left: 4px solid var(--color-secondary);
@@ -128,13 +136,15 @@ tbody tr:last-child td { border-bottom: none; }
 .empty-message { text-align: center; padding: 30px; color: var(--color-text-muted); }
 
 .toast {
-    position: fixed; bottom: 20px; right: 20px; background-color: #22c55e;
+    position: fixed; bottom: 20px; right: 20px; background-color: var(--color-success);
     color: white; padding: 15px 25px; border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     opacity: 0; transform: translateY(20px); transition: all 0.4s ease;
-    z-index: 1000;
+    z-index: 1000; font-weight: 500;
 }
 .toast.show { opacity: 1; transform: translateY(0); }
+/* --- NOVO ESTILO DE NOTIFICAÇÃO --- */
+.toast.danger { background-color: var(--color-danger); }
 
 /* =================================================================== */
 /* 5. RESPONSIVIDADE                                                   */
@@ -145,4 +155,195 @@ tbody tr:last-child td { border-bottom: none; }
     .main-nav { flex-wrap: wrap; }
     .nav-button { padding: 8px 18px; }
     th, td { padding: 10px; font-size: 0.9em; }
-}
+}```
+
+---
+
+### Passo 2: A Lógica Corrigida — `script.js`
+
+Esta versão corrige o bug de exibição na página `jogos.html` e implementa a confirmação e o feedback visual para a função de remover.
+
+**Substitua todo o conteúdo do seu `script.js` por este:**
+
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // ===================================================================
+    // 1. CONFIGURAÇÕES GLOBAIS E FUNÇÕES DE DADOS
+    // ===================================================================
+    const QUALIFICATION_AVERAGE = 4.5;
+    const getPlayers = () => JSON.parse(localStorage.getItem('tcsPlayers')) || [];
+    const savePlayers = (players) => localStorage.setItem('tcsPlayers', JSON.stringify(players));
+    const getMatches = () => JSON.parse(localStorage.getItem('tcsMatches')) || [];
+    const saveMatches = (matches) => localStorage.setItem('tcsMatches', JSON.stringify(matches));
+    
+    const calculatePoints = (player) => {
+        let points = (player.goals * 3) + (player.saves * 2);
+        points += Math.floor(player.assists / 7);
+        points += Math.floor(player.dribbles / 5);
+        return points;
+    };
+
+    const toast = document.getElementById('toast-notification');
+    const showToast = (message, type = 'success') => {
+        if (!toast) return; // Não faz nada se a notificação não existir na página
+        toast.textContent = message;
+        toast.className = 'toast'; // Reseta as classes
+        toast.classList.add(type); // Adiciona 'success' ou 'danger'
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    };
+
+    // ===================================================================
+    // 2. IDENTIFICAÇÃO E LÓGICA DA PÁGINA ATUAL
+    // ===================================================================
+    const pageRankingBody = document.getElementById('player-ranking-body');
+    const pageHistoryContainer = document.getElementById('match-history-container');
+    const pageAdminForm = document.getElementById('add-player-form');
+
+    // LÓGICA: PÁGINA DE CLASSIFICAÇÃO
+    if (pageRankingBody) {
+        const players = getPlayers();
+        if (players.length === 0) {
+            pageRankingBody.innerHTML = `<tr><td colspan="3" class="empty-message">Nenhum jogador cadastrado. Adicione na página de Admin.</td></tr>`;
+        } else {
+            players.sort((a, b) => calculatePoints(b) - calculatePoints(a));
+            players.forEach(player => {
+                const totalPoints = calculatePoints(player);
+                const status = totalPoints >= QUALIFICATION_AVERAGE ? 'Qualificado' : 'Não Qualificado';
+                const statusClass = totalPoints >= QUALIFICATION_AVERAGE ? 'status-qualified' : 'status-not-qualified';
+                pageRankingBody.insertRow().innerHTML = `<td>${player.name}</td><td>${totalPoints.toFixed(1)}</td><td class="${statusClass}">${status}</td>`;
+            });
+        }
+    }
+
+    // LÓGICA: PÁGINA DE HISTÓRICO (CORRIGIDA)
+    if (pageHistoryContainer) {
+        const titleElement = pageHistoryContainer.querySelector('h2');
+        // Limpa apenas o conteúdo, preservando o título
+        while (pageHistoryContainer.lastChild !== titleElement) {
+            pageHistoryContainer.removeChild(pageHistoryContainer.lastChild);
+        }
+
+        const matches = getMatches();
+        if (matches.length === 0) {
+            pageHistoryContainer.insertAdjacentHTML('beforeend', `<p class="empty-message">Nenhum jogo registrado. Adicione na página de Admin.</p>`);
+        } else {
+            matches.slice().reverse().forEach(match => {
+                const performancesHTML = match.stats
+                    .filter(s => s.goals > 0 || s.assists > 0 || s.saves > 0 || s.dribbles > 0)
+                    .map(stat => `<li><strong>${stat.name}</strong> (G: ${stat.goals}, A: ${stat.assists}, S: ${stat.saves}, D: ${stat.dribbles})</li>`).join('');
+                
+                const matchCardHTML = `
+                    <div class="match-card">
+                        <h3>vs ${match.opponent}</h3><p>Resultado: ${match.result}</p>
+                        ${performancesHTML ? `<div class="player-performance"><ul>${performancesHTML}</ul></div>` : ''}
+                    </div>`;
+                pageHistoryContainer.insertAdjacentHTML('beforeend', matchCardHTML);
+            });
+        }
+    }
+
+    // LÓGICA: PÁGINA DE ADMIN
+    if (pageAdminForm) {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabButtons.forEach(button => button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            tabContents.forEach(content => content.classList.toggle('active', content.id === `${button.dataset.tab}-content`));
+        }));
+
+        const adminPlayerListBody = document.getElementById('admin-player-list-body');
+        const playerStatsForMatchDiv = document.getElementById('player-stats-for-match');
+        const adminMatchListBody = document.getElementById('admin-match-list-body');
+
+        const renderAdminPlayers = () => { /* ... */ };
+        const renderAdminMatches = () => { /* ... */ };
+        const populateMatchForm = () => { /* ... */ };
+
+        renderAdminPlayers = () => {
+            const players = getPlayers();
+            adminPlayerListBody.innerHTML = '';
+            if (players.length === 0) {
+                adminPlayerListBody.innerHTML = `<tr><td colspan="6" class="empty-message">Nenhum jogador.</td></tr>`;
+            } else {
+                players.forEach((p, i) => adminPlayerListBody.insertRow().innerHTML = `<td>${p.name}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.saves}</td><td>${p.dribbles}</td><td><button class="btn-remove" data-type="player" data-index="${i}">X</button></td>`);
+            }
+        };
+
+        renderAdminMatches = () => {
+            const matches = getMatches();
+            adminMatchListBody.innerHTML = '';
+            if (matches.length === 0) {
+                adminMatchListBody.innerHTML = `<tr><td colspan="3" class="empty-message">Nenhum jogo.</td></tr>`;
+            } else {
+                matches.forEach((m, i) => adminMatchListBody.insertRow().innerHTML = `<td>${m.opponent}</td><td>${m.result}</td><td><button class="btn-remove" data-type="match" data-index="${i}">X</button></td>`);
+            }
+        };
+        
+        populateMatchForm = () => {
+            const players = getPlayers();
+            playerStatsForMatchDiv.innerHTML = '';
+            if (players.length === 0) {
+                playerStatsForMatchDiv.innerHTML = `<p class="empty-message">Adicione jogadores na aba "Jogadores" primeiro.</p>`;
+            } else {
+                players.forEach(p => playerStatsForMatchDiv.innerHTML += `<div class="player-stat-input"><h4>${p.name}</h4><input type="hidden" value="${p.name}"><label>Gols:</label><input type="number" class="match-goals" value="0" min="0"><label>Assist.:</label><input type="number" class="match-assists" value="0" min="0"><label>Salvos:</label><input type="number" class="match-saves" value="0" min="0"><label>Dribles:</label><input type="number" class="match-dribbles" value="0" min="0"></div>`);
+            }
+        };
+
+        pageAdminForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const playerName = document.getElementById('player-name').value.trim();
+            const players = getPlayers();
+            const existingPlayerIndex = players.findIndex(p => p.name.toLowerCase() === playerName.toLowerCase());
+            const playerData = { name: playerName, goals: parseInt(document.getElementById('goals').value) || 0, assists: parseInt(document.getElementById('assists').value) || 0, saves: parseInt(document.getElementById('saves').value) || 0, dribbles: parseInt(document.getElementById('dribbles').value) || 0 };
+            
+            if (existingPlayerIndex > -1) players[existingPlayerIndex] = playerData;
+            else players.push(playerData);
+
+            savePlayers(players);
+            renderAdminPlayers();
+            populateMatchForm();
+            pageAdminForm.reset();
+            showToast('Jogador salvo com sucesso!', 'success');
+        });
+
+        document.getElementById('add-match-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const playerStats = Array.from(playerStatsForMatchDiv.querySelectorAll('.player-stat-input')).map(div => ({ name: div.querySelector('input[type="hidden"]').value, goals: parseInt(div.querySelector('.match-goals').value) || 0, assists: parseInt(div.querySelector('.match-assists').value) || 0, saves: parseInt(div.querySelector('.match-saves').value) || 0, dribbles: parseInt(div.querySelector('.match-dribbles').value) || 0 }));
+            const newMatch = { opponent: document.getElementById('opponent-name').value, result: document.getElementById('match-result').value, stats: playerStats };
+            saveMatches([...getMatches(), newMatch]);
+            renderAdminMatches();
+            e.target.reset();
+            populateMatchForm();
+            showToast('Jogo salvo com sucesso!', 'success');
+        });
+
+        // LÓGICA DE REMOÇÃO (CORRIGIDA E MELHORADA)
+        document.querySelector('.container').addEventListener('click', e => {
+            if (e.target.matches('.btn-remove')) {
+                const type = e.target.dataset.type;
+                const index = parseInt(e.target.dataset.index);
+                
+                const confirmation = confirm(`Tem certeza que deseja remover este ${type === 'player' ? 'jogador' : 'jogo'}? Esta ação não pode ser desfeita.`);
+
+                if (confirmation) {
+                    if (type === 'player') {
+                        const players = getPlayers(); players.splice(index, 1); savePlayers(players);
+                        renderAdminPlayers(); populateMatchForm();
+                        showToast('Jogador removido.', 'danger');
+                    } else if (type === 'match') {
+                        const matches = getMatches(); matches.splice(index, 1); saveMatches(matches);
+                        renderAdminMatches();
+                        showToast('Jogo removido.', 'danger');
+                    }
+                }
+            }
+        });
+
+        renderAdminPlayers();
+        renderAdminMatches();
+        populateMatchForm();
+    }
+});
