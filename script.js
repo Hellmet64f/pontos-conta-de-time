@@ -1,12 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // CONSTANTES E FUNÇÕES GERAIS
+    // ===================================================================
+    // 1. CONFIGURAÇÕES GLOBAIS E FUNÇÕES DE DADOS
+    // ===================================================================
     const QUALIFICATION_AVERAGE = 4.5;
     const getPlayers = () => JSON.parse(localStorage.getItem('tcsPlayers')) || [];
     const savePlayers = (players) => localStorage.setItem('tcsPlayers', JSON.stringify(players));
     const getMatches = () => JSON.parse(localStorage.getItem('tcsMatches')) || [];
     const saveMatches = (matches) => localStorage.setItem('tcsMatches', JSON.stringify(matches));
-
+    
     const calculatePoints = (player) => {
         let points = (player.goals * 3) + (player.saves * 2);
         points += Math.floor(player.assists / 7);
@@ -14,164 +16,152 @@ document.addEventListener('DOMContentLoaded', () => {
         return points;
     };
 
-    // IDENTIFICADORES DE PÁGINA
-    const pageRanking = document.getElementById('player-ranking');
-    const pageHistory = document.getElementById('match-history');
-    const pageAdmin = document.getElementById('add-player-form');
+    const toast = document.getElementById('toast-notification');
+    const showToast = (message) => {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    };
 
-    // PÁGINA PRINCIPAL (INDEX.HTML)
-    if (pageRanking && !pageAdmin) {
-        const playerRankingBody = pageRanking.getElementsByTagName('tbody')[0];
-        const renderRanking = () => {
-            playerRankingBody.innerHTML = '';
-            const players = getPlayers(); // Pega os jogadores
+    // ===================================================================
+    // 2. IDENTIFICAÇÃO E LÓGICA DA PÁGINA ATUAL
+    // ===================================================================
+    const pageRankingBody = document.getElementById('player-ranking-body');
+    const pageHistoryContainer = document.getElementById('match-history-container');
+    const pageAdminForm = document.getElementById('add-player-form');
 
-            // ---- MELHORIA AQUI ----
-            if (players.length === 0) {
-                // Se não houver jogadores, exibe uma mensagem
-                const row = playerRankingBody.insertRow();
-                const cell = row.insertCell();
-                cell.colSpan = 3; // Ocupa as 3 colunas da tabela
-                cell.textContent = 'Nenhum jogador cadastrado. Adicione jogadores na página de Admin.';
-                cell.style.textAlign = 'center';
-                return;
-            }
-            // ---- FIM DA MELHORIA ----
-
+    // LÓGICA: PÁGINA DE CLASSIFICAÇÃO
+    if (pageRankingBody) {
+        const players = getPlayers();
+        if (players.length === 0) {
+            pageRankingBody.innerHTML = `<tr><td colspan="3" class="empty-message">Nenhum jogador cadastrado. Adicione na página de Admin.</td></tr>`;
+        } else {
+            players.sort((a, b) => calculatePoints(b) - calculatePoints(a)); // Ordena por pontos
             players.forEach(player => {
                 const totalPoints = calculatePoints(player);
                 const status = totalPoints >= QUALIFICATION_AVERAGE ? 'Qualificado' : 'Não Qualificado';
                 const statusClass = totalPoints >= QUALIFICATION_AVERAGE ? 'status-qualified' : 'status-not-qualified';
-                const row = playerRankingBody.insertRow();
-                row.innerHTML = `<td>${player.name}</td><td>${totalPoints.toFixed(1)}</td><td class="${statusClass}">${status}</td>`;
+                pageRankingBody.insertRow().innerHTML = `<td>${player.name}</td><td>${totalPoints.toFixed(1)}</td><td class="${statusClass}">${status}</td>`;
             });
-        };
-        renderRanking();
+        }
     }
 
-    // PÁGINA DE HISTÓRICO (JOGOS.HTML)
-    if (pageHistory && !pageAdmin) {
-        const renderMatchHistory = () => {
-            pageHistory.innerHTML = '';
-            const matches = getMatches();
-            
-            // A mensagem para histórico vazio já existia e está correta.
-            if (matches.length === 0) {
-                pageHistory.innerHTML = '<p style="text-align: center;">Nenhum jogo foi registrado ainda. Vá para a página de Admin para adicionar.</p>';
-                return;
-            }
+    // LÓGICA: PÁGINA DE HISTÓRICO
+    if (pageHistoryContainer) {
+        const matches = getMatches();
+        const historyContent = pageHistoryContainer.querySelector('h2'); // Preserva o título
+        pageHistoryContainer.innerHTML = '';
+        pageHistoryContainer.appendChild(historyContent);
 
+        if (matches.length === 0) {
+            pageHistoryContainer.innerHTML += `<p class="empty-message">Nenhum jogo registrado. Adicione na página de Admin.</p>`;
+        } else {
             matches.slice().reverse().forEach(match => {
-                let performancesHTML = match.stats
+                const performancesHTML = match.stats
                     .filter(s => s.goals > 0 || s.assists > 0 || s.saves > 0 || s.dribbles > 0)
-                    .map(stat => `<li>${stat.name} (G: ${stat.goals}, A: ${stat.assists}, S: ${stat.saves}, D: ${stat.dribbles})</li>`)
-                    .join('');
+                    .map(stat => `<li><strong>${stat.name}</strong> (G: ${stat.goals}, A: ${stat.assists}, S: ${stat.saves}, D: ${stat.dribbles})</li>`).join('');
                 
-                if (performancesHTML) {
-                    performancesHTML = `<div class="player-performance"><ul>${performancesHTML}</ul></div>`;
-                } else {
-                    performancesHTML = `<div class="player-performance"><p>Nenhuma estatística de destaque registrada.</p></div>`;
-                }
-                pageHistory.innerHTML += `<div class="match-card"><h3>vs ${match.opponent}</h3><p>Resultado: ${match.result}</p>${performancesHTML}</div>`;
+                pageHistoryContainer.innerHTML += `
+                    <div class="match-card">
+                        <h3>vs ${match.opponent}</h3><p>Resultado: ${match.result}</p>
+                        ${performancesHTML ? `<div class="player-performance"><ul>${performancesHTML}</ul></div>` : ''}
+                    </div>`;
             });
-        };
-        renderMatchHistory();
+        }
     }
 
-    // PÁGINA DE ADMIN (ADMIN.HTML)
-    if (pageAdmin) {
-        // Lógica das abas do Admin
+    // LÓGICA: PÁGINA DE ADMIN
+    if (pageAdminForm) {
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetTab = button.getAttribute('data-tab');
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                tabContents.forEach(content => content.id === `${targetTab}-content` ? content.classList.add('active') : content.classList.remove('active'));
-            });
-        });
+        tabButtons.forEach(button => button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            tabContents.forEach(content => content.classList.toggle('active', content.id === `${button.dataset.tab}-content`));
+        }));
 
-        // O resto do código do Admin continua o mesmo...
-        const playerForm = document.getElementById('add-player-form');
-        const adminPlayerList = document.getElementById('admin-player-list').getElementsByTagName('tbody')[0];
-        const matchForm = document.getElementById('add-match-form');
+        const adminPlayerListBody = document.getElementById('admin-player-list-body');
         const playerStatsForMatchDiv = document.getElementById('player-stats-for-match');
-        const adminMatchList = document.getElementById('admin-match-list').getElementsByTagName('tbody')[0];
+        const adminMatchListBody = document.getElementById('admin-match-list-body');
 
-        const renderAdminPlayerList = () => {
-            adminPlayerList.innerHTML = '';
-            getPlayers().forEach((p, i) => {
-                adminPlayerList.insertRow().innerHTML = `<td>${p.name}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.saves}</td><td>${p.dribbles}</td><td><button class="btn-remove" data-type="player" data-index="${i}">Remover</button></td>`;
-            });
-        };
+        const renderAdminPlayers = () => { /* ... */ };
+        const renderAdminMatches = () => { /* ... */ };
+        const populateMatchForm = () => { /* ... */ };
 
-        const populateMatchForm = () => {
-            playerStatsForMatchDiv.innerHTML = '';
+        renderAdminPlayers = () => {
             const players = getPlayers();
+            adminPlayerListBody.innerHTML = '';
             if (players.length === 0) {
-                playerStatsForMatchDiv.innerHTML = "<p>Adicione jogadores na aba 'Jogadores' primeiro.</p>";
-                return;
+                adminPlayerListBody.innerHTML = `<tr><td colspan="6" class="empty-message">Nenhum jogador.</td></tr>`;
+            } else {
+                players.forEach((p, i) => adminPlayerListBody.insertRow().innerHTML = `<td>${p.name}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.saves}</td><td>${p.dribbles}</td><td><button class="btn-remove" data-type="player" data-index="${i}">X</button></td>`);
             }
-            players.forEach(p => {
-                playerStatsForMatchDiv.innerHTML += `<div class="player-stat-input"><h4>${p.name}</h4><input type="hidden" class="player-name-hidden" value="${p.name}"><label>Gols:</label><input type="number" class="player-goals" value="0" min="0"><label>Assist.:</label><input type="number" class="player-assists" value="0" min="0"><label>Salvos:</label><input type="number" class="player-saves" value="0" min="0"><label>Dribles:</label><input type="number" class="player-dribbles" value="0" min="0"></div>`;
-            });
         };
 
-        const renderAdminMatchList = () => {
-            adminMatchList.innerHTML = '';
-            getMatches().forEach((m, i) => {
-                adminMatchList.insertRow().innerHTML = `<td>${m.opponent}</td><td>${m.result}</td><td><button class="btn-remove" data-type="match" data-index="${i}">Remover</button></td>`;
-            });
+        renderAdminMatches = () => {
+            const matches = getMatches();
+            adminMatchListBody.innerHTML = '';
+            if (matches.length === 0) {
+                adminMatchListBody.innerHTML = `<tr><td colspan="3" class="empty-message">Nenhum jogo.</td></tr>`;
+            } else {
+                matches.forEach((m, i) => adminMatchListBody.insertRow().innerHTML = `<td>${m.opponent}</td><td>${m.result}</td><td><button class="btn-remove" data-type="match" data-index="${i}">X</button></td>`);
+            }
+        };
+        
+        populateMatchForm = () => {
+            const players = getPlayers();
+            playerStatsForMatchDiv.innerHTML = '';
+            if (players.length === 0) {
+                playerStatsForMatchDiv.innerHTML = `<p class="empty-message">Adicione jogadores na aba "Jogadores" primeiro.</p>`;
+            } else {
+                players.forEach(p => playerStatsForMatchDiv.innerHTML += `<div class="player-stat-input"><h4>${p.name}</h4><input type="hidden" value="${p.name}"><label>Gols:</label><input type="number" class="match-goals" value="0" min="0"><label>Assist.:</label><input type="number" class="match-assists" value="0" min="0"><label>Salvos:</label><input type="number" class="match-saves" value="0" min="0"><label>Dribles:</label><input type="number" class="match-dribbles" value="0" min="0"></div>`);
+            }
         };
 
-        playerForm.addEventListener('submit', e => {
+        pageAdminForm.addEventListener('submit', e => {
             e.preventDefault();
-            const playerName = document.getElementById('player-name').value;
-            let players = getPlayers();
+            const playerName = document.getElementById('player-name').value.trim();
+            const players = getPlayers();
             const existingPlayerIndex = players.findIndex(p => p.name.toLowerCase() === playerName.toLowerCase());
-            const playerData = { name: playerName, goals: parseInt(document.getElementById('goals').value), assists: parseInt(document.getElementById('assists').value), saves: parseInt(document.getElementById('saves').value), dribbles: parseInt(document.getElementById('dribbles').value) };
+            const playerData = { name: playerName, goals: parseInt(document.getElementById('goals').value) || 0, assists: parseInt(document.getElementById('assists').value) || 0, saves: parseInt(document.getElementById('saves').value) || 0, dribbles: parseInt(document.getElementById('dribbles').value) || 0 };
+            
             if (existingPlayerIndex > -1) players[existingPlayerIndex] = playerData;
             else players.push(playerData);
+
             savePlayers(players);
-            renderAdminPlayerList();
+            renderAdminPlayers();
             populateMatchForm();
-            playerForm.reset();
+            pageAdminForm.reset();
+            showToast('Jogador salvo com sucesso!');
         });
 
-        matchForm.addEventListener('submit', e => {
+        document.getElementById('add-match-form').addEventListener('submit', e => {
             e.preventDefault();
-            const playerStats = Array.from(playerStatsForMatchDiv.querySelectorAll('.player-stat-input')).map(div => ({ name: div.querySelector('.player-name-hidden').value, goals: parseInt(div.querySelector('.player-goals').value), assists: parseInt(div.querySelector('.player-assists').value), saves: parseInt(div.querySelector('.player-saves').value), dribbles: parseInt(div.querySelector('.player-dribbles').value) }));
+            const playerStats = Array.from(playerStatsForMatchDiv.querySelectorAll('.player-stat-input')).map(div => ({ name: div.querySelector('input[type="hidden"]').value, goals: parseInt(div.querySelector('.match-goals').value) || 0, assists: parseInt(div.querySelector('.match-assists').value) || 0, saves: parseInt(div.querySelector('.match-saves').value) || 0, dribbles: parseInt(div.querySelector('.match-dribbles').value) || 0 }));
             const newMatch = { opponent: document.getElementById('opponent-name').value, result: document.getElementById('match-result').value, stats: playerStats };
-            let matches = getMatches();
-            matches.push(newMatch);
-            saveMatches(matches);
-            renderAdminMatchList();
-            matchForm.reset();
+            saveMatches([...getMatches(), newMatch]);
+            renderAdminMatches();
+            e.target.reset();
             populateMatchForm();
+            showToast('Jogo salvo com sucesso!');
         });
 
         document.querySelector('.container').addEventListener('click', e => {
-            if (e.target.classList.contains('btn-remove')) {
-                const type = e.target.getAttribute('data-type');
-                const index = parseInt(e.target.getAttribute('data-index'));
+            if (e.target.matches('.btn-remove')) {
+                const type = e.target.dataset.type;
+                const index = parseInt(e.target.dataset.index);
                 if (type === 'player') {
-                    let players = getPlayers();
-                    players.splice(index, 1);
-                    savePlayers(players);
-                    renderAdminPlayerList();
-                    populateMatchForm();
+                    const players = getPlayers(); players.splice(index, 1); savePlayers(players);
+                    renderAdminPlayers(); populateMatchForm();
                 } else if (type === 'match') {
-                    let matches = getMatches();
-                    matches.splice(index, 1);
-                    saveMatches(matches);
-                    renderAdminMatchList();
+                    const matches = getMatches(); matches.splice(index, 1); saveMatches(matches);
+                    renderAdminMatches();
                 }
             }
         });
 
-        renderAdminPlayerList();
+        renderAdminPlayers();
+        renderAdminMatches();
         populateMatchForm();
-        renderAdminMatchList();
     }
 });
