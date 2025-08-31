@@ -20,27 +20,27 @@
         </nav>
 
         <main>
-            <div class="rules">
-                <h3>Critérios de Pontuação</h3>
-                <p>Média de 4.5 pontos para entrar no time principal.</p>
-            </div>
+            <section class="rules">
+                <h2>Critérios de Pontuação</h2>
+                <p>Média de <strong>4.5 pontos</strong> para se qualificar para o time principal.</p>
+            </section>
             
-            <div class="player-list-container">
+            <section class="player-list-container">
+                <h2>Classificação Geral</h2>
                 <table id="player-ranking">
                     <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Pontos Totais</th>
-                            <th>Status</th>
-                        </tr>
+                        <tr><th>Nome</th><th>Pontos Totais</th><th>Status</th></tr>
                     </thead>
-                    <tbody id="player-ranking-body">
-                        <!-- O conteúdo será inserido pelo JavaScript -->
-                    </tbody>
+                    <tbody id="player-ranking-body"></tbody>
                 </table>
-            </div>
+            </section>
         </main>
+
+        <footer>
+            <p>&copy; 2025 The Comets (TCS). Desenvolvido com 💙</p>
+        </footer>
     </div>
+    <div id="toast-notification" class="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
